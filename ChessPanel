@@ -1,1 +1,169 @@
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+
+
+public class ChessPanel extends JPanel{
+	private JButton[][] board;   
+	//private ChessModel model;
+	private JPanel center;
+	private ImageIcon[] piecesW;
+	private ImageIcon[] piecesB;
+	private ImageIcon rook = new ImageIcon("C:\\Users\\Nathan\\Chess"
+				+ "\\src\\rook.png");
+	private ImageIcon pawn = new ImageIcon("C:\\Users\\Nathan\\Chess"
+			+ "\\src\\pawn.png");
+	private ImageIcon bishop = new ImageIcon("C:\\Users\\Nathan\\Chess"
+			+ "\\src\\bishop.png");
+	private ImageIcon knight = new ImageIcon("C:\\Users\\Nathan\\Chess"
+			+ "\\src\\knight.png");
+	private ImageIcon queen = new ImageIcon("C:\\Users\\Nathan\\Chess"
+			+ "\\src\\queen.png");
+	private ImageIcon king = new ImageIcon("C:\\Users\\Nathan\\Chess"
+			+ "\\src\\king.png");
+	
+//	private ImageIcon rookB = new ImageIcon("C:\\Users\\Nathan\\Chess"
+//			+ "\\src\\rookB.png");
+//	private ImageIcon pawnB = new ImageIcon("C:\\Users\\Nathan\\Chess"
+//		+ "\\src\\pawnB.png");
+//	private ImageIcon bishopB = new ImageIcon("C:\\Users\\Nathan\\Chess"
+//		+ "\\src\\bishopB.png");
+//	private ImageIcon knightB = new ImageIcon("C:\\Users\\Nathan\\Chess"
+//		+ "\\src\\knightB.png");
+//	private ImageIcon queenB = new ImageIcon("C:\\Users\\Nathan\\Chess"
+//		+ "\\src\\queenB.png");
+//	private ImageIcon kingB = new ImageIcon("C:\\Users\\Nathan\\Chess"
+//		+ "\\src\\kingB.png");
+
+	private ButtonListener buttonListener = new ButtonListener();
+
+	public ChessPanel() {
+		
+		piecesW = new ImageIcon[8];
+		piecesW[0] = rook;
+		piecesW[1] = knight;
+		piecesW[2] = bishop;
+		piecesW[3] = queen;
+		piecesW[4] = king;
+		piecesW[5] = bishop;
+		piecesW[6] = knight;
+		piecesW[7] = rook;
+		
+//		piecesB = new ImageIcon[8];
+//		piecesB[0] = rookB;
+//		piecesB[1] = knightB;
+//		piecesB[2] = bishopB;
+//		piecesB[3] = queenB;
+//		piecesB[4] = kingB;
+//		piecesB[5] = bishopB;
+//		piecesB[6] = knightB;
+//		piecesB[7] = rookB;
+		
+		ButtonListener listener = new ButtonListener();;
+		//mainFrame.setLayout(new BorderLayout());
+		center = new JPanel();
+		boolean white = true;
+		
+		center.setLayout(new GridLayout(8, 8));
+		board = new JButton[8][8];
+		
+		for (int col = 0; col < 8; col++){
+			white = !white;
+			for (int row = 0; row < 8; row++){
+				
+				if ( col == 1){
+					board[row][col] = new JButton("");
+					board[row][col].setPreferredSize(new Dimension(90, 90));
+					board[row][col].setIcon(pawn);
+					board[row][col].addActionListener(listener);
+					center.add(board[row][col]);
+					if ( white )
+						board[row][col].setBackground(Color.WHITE);
+					else
+						board[row][col].setBackground(Color.BLACK);
+					white = !white;
+				}
+				
+//				else if (col == 6){
+//					board[row][col] = new JButton("", pawnB);
+//					board[row][col].setPreferredSize(new Dimension(90,90));
+//					board[row][col].addActionListener(listener);
+//					center.add(board[row][col]);
+//					if ( white )
+//						board[row][col].setBackground(Color.WHITE);
+//					else
+//						board[row][col].setBackground(Color.BLACK);
+//					white = !white;
+//				}
+				else if (col == 0){
+					board[row][col] = new JButton("");
+					board[row][col].setPreferredSize(new Dimension(90,90));
+					board[row][col].setIcon(piecesW[row]);
+					board[row][col].addActionListener(listener);
+					center.add(board[row][col]);
+					if ( white )
+						board[row][col].setBackground(Color.WHITE);
+					else
+						board[row][col].setBackground(Color.BLACK);
+					white = !white;
+				}
+//				else if (col == 7){
+//					board[row][col] = new JButton("", piecesB[col]);
+//					board[row][col].setPreferredSize(new Dimension(90,90));
+//					board[row][col].addActionListener(listener);
+//					center.add(board[row][col]);
+//					if ( white )
+//						board[row][col].setBackground(Color.WHITE);
+//					else
+//						board[row][col].setBackground(Color.BLACK);
+//					white = !white;
+//				}
+				else {
+					board[row][col] = new JButton("");
+					board[row][col].setPreferredSize(new Dimension(90,90));
+					board[row][col].addActionListener(listener);
+					center.add(board[row][col]);
+					if ( white )
+						board[row][col].setBackground(Color.WHITE);
+					else
+						board[row][col].setBackground(Color.BLACK);
+					white = !white;
+				}
+			}
+		}
+		
+	add(center, BorderLayout.CENTER);
+	displayBoard();
+	}
+
+	   // method that updates the board
+	private void displayBoard() {
+		
+		
+		
+	}
+
+	   // add other helper methods as needed
+
+	   // inner class that represents action listener for buttons
+	private class ButtonListener implements ActionListener {
+
+		public void actionPerformed(ActionEvent event) {
+		 // complete this
+	 }
+	   }
+
+	
+}
 
