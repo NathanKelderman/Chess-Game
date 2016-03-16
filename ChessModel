@@ -1,1 +1,86 @@
+package chess;
 
+public class ChessModel implements IChessModel {
+	private IChessPiece[][] board;
+	private Player player;
+	private Rook rook;
+	private Knight knight;
+	private Bishop bishop;
+	private Queen queen;
+	private King king;
+	private final int BOARD_SIZE = 8;
+	private ChessPiece[] piecesB;
+	private ChessPiece[] piecesW;
+//  declare other instance variables as needed
+
+	public ChessModel() {
+		board = new IChessPiece[BOARD_SIZE][BOARD_SIZE];
+		player = Player.BLACK; // setting the AI to black
+		rook = new Rook(player);
+		knight = new Knight(player);
+		bishop = new Bishop(player);
+		queen = new Queen(player);
+		king = new King(player);
+		piecesB = new ChessPiece[]{rook, knight, bishop, queen, king, bishop, knight, rook};
+		player = Player.WHITE; // set the player to white
+		rook = new Rook(player);
+		knight = new Knight(player);
+		bishop = new Bishop(player);
+		queen = new Queen(player);
+		king = new King(player);
+		piecesW = new ChessPiece[]{rook, knight, bishop, queen, king, bishop, knight, rook};
+		// setting the array with whites pieces
+		setBoard();
+	}
+
+	public boolean isComplete() {
+		return false;
+	}
+
+	public boolean isValidMove(Move move) {
+		return false;
+		// complete this
+	}
+
+	public void move(Move move) {
+		// complete this
+	}
+
+	public boolean inCheck(Player p) {
+		return false;
+	}
+
+	public Player currentPlayer() {
+		return player;
+		// complete this
+	}
+
+	public int numRows() {
+		return 0;
+		// complete this
+	}
+
+	public int numColumns() {
+		return 0;
+		// complete this
+	}
+
+	public IChessPiece pieceAt(int row, int col) {
+		return board[row][col];
+	}
+	
+	public void setBoard() {
+		for (int row = 0; row < BOARD_SIZE; row++)
+			for (int col = 0; col < BOARD_SIZE; col++)
+				switch (row) {
+				case 0: board[row][col] = piecesB[col];
+				break;
+				case 1: board[row][col] = new Pawn(player);
+				break;
+				case 7: board[row][col] = piecesW[col];
+				default: board[row][col] = null;
+				}
+	}
+
+	// add other public or helper methods as needed
+}
