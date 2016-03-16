@@ -3,6 +3,7 @@ package chess;
 public class ChessModel implements IChessModel {
 	private IChessPiece[][] board;
 	private Player player;
+	private Pawn pawn;
 	private Rook rook;
 	private Knight knight;
 	private Bishop bishop;
@@ -16,19 +17,21 @@ public class ChessModel implements IChessModel {
 	public ChessModel() {
 		board = new IChessPiece[BOARD_SIZE][BOARD_SIZE];
 		player = Player.BLACK; // setting the AI to black
+		pawn = new Pawn(player);
 		rook = new Rook(player);
 		knight = new Knight(player);
 		bishop = new Bishop(player);
 		queen = new Queen(player);
 		king = new King(player);
-		piecesB = new ChessPiece[]{rook, knight, bishop, queen, king, bishop, knight, rook};
+		piecesB = new ChessPiece[]{rook, knight, bishop, queen, king, bishop, knight, rook, pawn};
 		player = Player.WHITE; // set the player to white
+		pawn = new Pawn(player);
 		rook = new Rook(player);
 		knight = new Knight(player);
 		bishop = new Bishop(player);
 		queen = new Queen(player);
 		king = new King(player);
-		piecesW = new ChessPiece[]{rook, knight, bishop, queen, king, bishop, knight, rook};
+		piecesW = new ChessPiece[]{rook, knight, bishop, queen, king, bishop, knight, rook, pawn};
 		// setting the array with whites pieces
 		setBoard();
 	}
@@ -72,12 +75,15 @@ public class ChessModel implements IChessModel {
 	public void setBoard() {
 		for (int row = 0; row < BOARD_SIZE; row++)
 			for (int col = 0; col < BOARD_SIZE; col++)
-				switch (row) {
-				case 0: board[row][col] = piecesB[col];
+				switch (col) {
+				case 0: board[row][col] = piecesB[row];
 				break;
-				case 1: board[row][col] = new Pawn(player);
+				case 1: board[row][col] = piecesB[8];
 				break;
-				case 7: board[row][col] = piecesW[col];
+				case 6: board[row][col] = piecesW[8];
+				break;
+				case 7: board[row][col] = piecesW[row];
+				break;
 				default: board[row][col] = null;
 				}
 	}
