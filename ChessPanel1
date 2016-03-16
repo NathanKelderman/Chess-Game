@@ -76,28 +76,41 @@ public class ChessPanel extends JPanel {
 		displayBoard();
 	}
 	
-	private void setBoard() {
-		
-		for (int col = 0; col < BOARD_SIZE; col++) {
-			for (int row = 0; row < BOARD_SIZE; row++) {
-				switch (col) {
-				case 0: board[row][col].setIcon(piecesW[row]);
-				break;
-				case 1: board[row][col].setIcon(pawn);
-				break;
-				case 6: board[row][col].setIcon(pawnB);
-				break;
-				case 7: board[row][col].setIcon(piecesB[row]);
-				break;
-				default: board[row][col].setIcon(null);
+private void displayBoard() {
+		for (int row = 0; row < BOARD_SIZE; row++) {
+			for (int col = 0; col < BOARD_SIZE; col++) {
+				if (model.pieceAt(row, col) != null){
+					if (model.pieceAt(row, col).player() == Player.WHITE ){
+						if (model.pieceAt(row, col).type().equals("Pawn"))
+							board[col][row].setIcon(pawn);
+						if (model.pieceAt(row, col).type().equals("Rook"))
+							board[col][row].setIcon(rook);
+						if (model.pieceAt(row, col).type().equals("Knight"))
+							board[col][row].setIcon(knight);
+						if (model.pieceAt(row, col).type().equals("Bishop"))
+							board[col][row].setIcon(bishop);
+						if (model.pieceAt(row, col).type().equals("King"))
+							board[col][row].setIcon(king);
+						if (model.pieceAt(row, col).type().equals("Queen"))
+							board[col][row].setIcon(queen);
+					}
+					else if (model.pieceAt(row, col).player() == Player.BLACK ){
+						if (model.pieceAt(row, col).type().equals("Pawn"))
+							board[col][row].setIcon(pawnB);
+						if (model.pieceAt(row, col).type().equals("Rook"))
+							board[col][row].setIcon(rookB);
+						if (model.pieceAt(row, col).type().equals("Knight"))
+							board[col][row].setIcon(knightB);
+						if (model.pieceAt(row, col).type().equals("Bishop"))
+							board[col][row].setIcon(bishopB);
+						if (model.pieceAt(row, col).type().equals("King"))
+							board[col][row].setIcon(kingB);
+						if (model.pieceAt(row, col).type().equals("Queen"))
+							board[col][row].setIcon(queenB);
+					}
 				}
 			}
 		}
-	}
-
-	   // method that updates the board
-	private void displayBoard() {
-		
 	}
 
 	   // add other helper methods as needed
