@@ -14,36 +14,35 @@ public class ChessPanel extends JPanel {
 	
 	private JButton[][] board;   
 	private ChessModel model;
-	private JPanel center;
-	private ImageIcon rook = new ImageIcon("/home/matthew/workspace/"
-			+ "ChessPrj/src/chess/White/rook.png");
-	private ImageIcon pawn = new ImageIcon("/home/matthew/workspace/"
-			+ "ChessPrj/src/chess/White/pawn.png");
-	private ImageIcon bishop = new ImageIcon("/home/matthew/workspace/"
-			+ "ChessPrj/src/chess/White/bishop.png");
-	private ImageIcon knight = new ImageIcon("/home/matthew/workspace/"
-			+ "ChessPrj/src/chess/White/knight.png");
-	private ImageIcon queen = new ImageIcon("/home/matthew/workspace/"
-			+ "ChessPrj/src/chess/White/queen.png");
-	private ImageIcon king = new ImageIcon("/home/matthew/workspace/"
-			+ "ChessPrj/src/chess/White/king.png");
-	
-	private ImageIcon rookB = new ImageIcon("/home/matthew/workspace/"
-			+ "ChessPrj/src/chess/Black/rookB.png");
-	private ImageIcon pawnB = new ImageIcon("/home/matthew/workspace/"
-			+ "ChessPrj/src/chess/Black/pawnB.png");
-	private ImageIcon bishopB = new ImageIcon("/home/matthew/workspace/"
-			+ "ChessPrj/src/chess/Black/bishopB.png");
-	private ImageIcon knightB = new ImageIcon("/home/matthew/workspace/"
-			+ "ChessPrj/src/chess/Black/knightB.png");
-	private ImageIcon queenB = new ImageIcon("/home/matthew/workspace/"
-			+ "ChessPrj/src/chess/Black/queenB.png");
-	private ImageIcon kingB = new ImageIcon("/home/matthew/workspace/"
-			+ "ChessPrj/src/chess/Black/kingB.png");
-	private final ImageIcon[] piecesW = {rook, knight, bishop, queen, king, bishop, knight, rook};
-	private final ImageIcon[] piecesB = {rookB, knightB, bishopB, queenB, kingB,  bishopB, knightB, rookB};
-	private final int BOARD_SIZE = 8;
+	private JPanel center;private ImageIcon rook = new ImageIcon("C:\\Users\\Nathan\\Chess"
+			+ "\\src\\rook.png");
+	private ImageIcon pawn = new ImageIcon("C:\\Users\\Nathan\\Chess"
+		+ "\\src\\pawn.png");
+	private ImageIcon bishop = new ImageIcon("C:\\Users\\Nathan\\Chess"
+		+ "\\src\\bishop.png");
+	private ImageIcon knight = new ImageIcon("C:\\Users\\Nathan\\Chess"
+		+ "\\src\\knight.png");
+	private ImageIcon queen = new ImageIcon("C:\\Users\\Nathan\\Chess"
+		+ "\\src\\queen.png");
+	private ImageIcon king = new ImageIcon("C:\\Users\\Nathan\\Chess"
+		+ "\\src\\king.png");
 
+	private ImageIcon rookB = new ImageIcon("C:\\Users\\Nathan\\Chess"
+		+ "\\src\\rookB.png");
+	private ImageIcon pawnB = new ImageIcon("C:\\Users\\Nathan\\Chess"
+		+ "\\src\\pawnB.png");
+	private ImageIcon bishopB = new ImageIcon("C:\\Users\\Nathan\\Chess"
+		+ "\\src\\bishopB.png");
+	private ImageIcon knightB = new ImageIcon("C:\\Users\\Nathan\\Chess"
+		+ "\\src\\knightB.png");
+	private ImageIcon queenB = new ImageIcon("C:\\Users\\Nathan\\Chess"
+		+ "\\src\\queenB.png");
+	private ImageIcon kingB = new ImageIcon("C:\\Users\\Nathan\\Chess"
+			+ "\\src\\kingB.png");
+
+	private final int BOARD_SIZE = 8;
+	
+	
 	public ChessPanel() {
 		
 		ButtonListener listener = new ButtonListener();
@@ -55,9 +54,9 @@ public class ChessPanel extends JPanel {
 		
 		boolean white = true;
 		
-		for (int col = 0; col < BOARD_SIZE; col++) {
+		for (int row = 0; row < BOARD_SIZE; row++) {
 			white = !white;
-			for (int row = 0; row < BOARD_SIZE; row++) {
+			for (int col = 0; col < BOARD_SIZE; col++) {
 				
 				board[row][col] = new JButton("");
 				board[row][col].setPreferredSize(new Dimension(90, 90));
@@ -71,12 +70,12 @@ public class ChessPanel extends JPanel {
 			}
 		}
 		
-		setBoard();
 		add(center, BorderLayout.CENTER);
 		displayBoard();
 	}
-	
-private void displayBoard() {
+
+	   // method that updates the board
+	private void displayBoard() {
 		for (int row = 0; row < BOARD_SIZE; row++) {
 			for (int col = 0; col < BOARD_SIZE; col++) {
 				if (model.pieceAt(row, col) != null){
