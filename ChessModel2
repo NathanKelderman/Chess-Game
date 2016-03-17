@@ -1,0 +1,93 @@
+package chess;
+
+import javax.swing.JOptionPane;
+
+public class ChessModel implements IChessModel {
+	
+	private IChessPiece[][] board;
+	private Player player;
+	private final int BOARD_SIZE = 8;
+	private boolean firstMove;
+//  declare other instance variables as needed
+
+	public ChessModel() {
+
+		board = new IChessPiece[BOARD_SIZE][BOARD_SIZE];
+		
+		player = Player.BLACK; // setting the AI to black
+		board[0][0] = new Rook(player);
+		board[0][1] = new Knight(player);
+		board[0][2] = new Bishop(player);
+		board[0][3] = new Queen(player);
+		board[0][4] = new King(player);
+		board[0][5] = new Bishop(player);
+		board[0][6] = new Knight(player);
+		board[0][7] = new Rook(player);
+		
+		for(int col = 0; col < 8; col++)
+			board[1][col] = new Pawn(player);
+		
+		player = Player.WHITE;
+		board[7][0] = new Rook(player);
+		board[7][1] = new Knight(player);
+		board[7][2] = new Bishop(player);
+		board[7][3] = new Queen(player);
+		board[7][4] = new King(player);
+		board[7][5] = new Bishop(player);
+		board[7][6] = new Knight(player);
+		board[7][7] = new Rook(player);
+
+		for(int col = 0; col < 8; col++)
+			board[6][col] = new Pawn(player);
+		
+		setFirstMove(true);
+	}
+
+	public boolean isFirstMove() {
+		return firstMove;
+	}
+
+	public void setFirstMove(boolean firstMove) {
+		this.firstMove = firstMove;
+	}
+
+	public boolean isComplete() {
+		return false;
+	}
+
+	public boolean isValidMove(Move move) {
+		if (pieceAt(move.fromRow, move.fromColumn) != null)
+			return true;
+		
+		JOptionPane.showMessageDialog(null, "Not a valid move!");
+		return false;
+		// complete this comes from panel to see if first clicked spot isnt null and and right color.
+	}
+
+	public void move(Move move) {
+		board[move.toRow][move.toColumn] = board[move.fromRow][move.fromColumn];
+		board[move.fromRow][move.fromColumn] = null;
+	}
+
+	public boolean inCheck(Player p) {
+		return false;
+	}
+
+	public Player currentPlayer() {
+		return player;
+	}
+
+	public int numRows() {
+		return BOARD_SIZE;
+	}
+
+	public int numColumns() {
+		return BOARD_SIZE;
+	}
+
+	public IChessPiece pieceAt(int row, int col) {
+		return board[row][col];
+	}
+	
+	// add other public or helper methods as needed
+}
