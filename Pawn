@@ -1,1 +1,98 @@
+package chess;
+
+public class Pawn extends ChessPiece {
+
+	private boolean startingPosition = true;
+
+	protected Pawn(Player player) {
+		super(player);
+		// TODO Auto-generated constructor stub
+	}
+
+	@Override
+	public String type() {
+		return "Pawn";
+	}
+
+	@Override
+	public boolean isValidMove(Move move, IChessPiece[][] board) {
+		if (super.isValidMove(move, board))
+			if (player() == Player.WHITE) {
+				if (board[move.toRow][move.toColumn] != null) {
+					if(move.fromColumn != 0 && move.fromColumn != 7) {
+						if (board[move.toRow][move.toColumn] == board[move.fromRow-1][move.fromColumn-1] 
+								|| board[move.toRow][move.toColumn] == board[move.fromRow-1][move.fromColumn+1])
+
+							if (move.toRow == (move.fromRow - 1)) {
+								startingPosition = false;
+								return true;
+							}
+					}
+					else 
+						if (move.fromColumn == 0) {
+							if (board[move.toRow][move.toColumn] == board[move.fromRow-1][move.fromColumn+1])
+
+								if (move.toRow == (move.fromRow - 1)) {
+									startingPosition = false;
+									return true;
+								}
+						}
+						else 
+							if (board[move.toRow][move.toColumn] == board[move.fromRow+1][move.fromColumn-1])
+
+								if (move.toRow == (move.fromRow - 1)) {
+									startingPosition = false;
+									return true;
+								}
+				}
+				else 
+					if (startingPosition && move.toRow == (move.fromRow - 2) && move.toColumn == move.fromColumn) {
+						startingPosition = false;
+						return true;
+					}
+					else if (move.toRow == (move.fromRow - 1) && move.toColumn == move.fromColumn) {
+						startingPosition = false;
+						return true;
+					}
+			}
+			else if (player() == Player.BLACK)
+				if (board[move.toRow][move.toColumn] != null) {
+					if(move.fromColumn != 0 && move.fromColumn != 7) {
+						if (board[move.toRow][move.toColumn] == board[move.fromRow+1][move.fromColumn+1] 
+								|| board[move.toRow][move.toColumn] == board[move.fromRow+1][move.fromColumn-1])
+
+							if (move.toRow == (move.fromRow + 1)) {
+								startingPosition = false;
+								return true;
+							}
+							else 
+								if (move.fromColumn == 0) {
+									if (board[move.toRow][move.toColumn] == board[move.fromRow+1][move.fromColumn-1])
+
+										if (move.toRow == (move.fromRow - 1)) {
+											startingPosition = false;
+											return true;
+										}
+								}
+								else 
+									if (board[move.toRow][move.toColumn] == board[move.fromRow+1][move.fromColumn+1])
+
+										if (move.toRow == (move.fromRow - 1)) {
+											startingPosition = false;
+											return true;
+										}
+					}
+				}
+				else 
+					if (startingPosition && move.toRow == (move.fromRow + 2) && move.toColumn == move.fromColumn) {
+						startingPosition = false;
+						return true;
+					}
+					else if (move.toRow == (move.fromRow + 1) && move.toColumn == move.fromColumn) {
+						startingPosition = false;
+						return true;
+					}
+		return false;
+	}
+}
 
