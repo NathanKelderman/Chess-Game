@@ -1,0 +1,150 @@
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JPanel;
+
+public class ChessPanel extends JPanel {
+	
+	private JButton[][] board; 
+	
+	private int colMove = 0;
+	private int rowMove = 0;
+	
+	private Move move;
+	private ChessModel model;
+	private JPanel center;
+	private ImageIcon rook = new ImageIcon("C:\\Users\\Nathan\\Chess"
+			+ "\\src\\rook.png");
+	private ImageIcon pawn = new ImageIcon("C:\\Users\\Nathan\\Chess"
+		+ "\\src\\pawn.png");
+	private ImageIcon bishop = new ImageIcon("C:\\Users\\Nathan\\Chess"
+		+ "\\src\\bishop.png");
+	private ImageIcon knight = new ImageIcon("C:\\Users\\Nathan\\Chess"
+		+ "\\src\\knight.png");
+	private ImageIcon queen = new ImageIcon("C:\\Users\\Nathan\\Chess"
+		+ "\\src\\queen.png");
+	private ImageIcon king = new ImageIcon("C:\\Users\\Nathan\\Chess"
+		+ "\\src\\king.png");
+
+	private ImageIcon rookB = new ImageIcon("C:\\Users\\Nathan\\Chess"
+		+ "\\src\\rookB.png");
+	private ImageIcon pawnB = new ImageIcon("C:\\Users\\Nathan\\Chess"
+		+ "\\src\\pawnB.png");
+	private ImageIcon bishopB = new ImageIcon("C:\\Users\\Nathan\\Chess"
+		+ "\\src\\bishopB.png");
+	private ImageIcon knightB = new ImageIcon("C:\\Users\\Nathan\\Chess"
+		+ "\\src\\knightB.png");
+	private ImageIcon queenB = new ImageIcon("C:\\Users\\Nathan\\Chess"
+		+ "\\src\\queenB.png");
+	private ImageIcon kingB = new ImageIcon("C:\\Users\\Nathan\\Chess"
+			+ "\\src\\kingB.png");
+
+	private final int BOARD_SIZE = 8;
+	
+	
+	public ChessPanel() {
+		
+		ButtonListener listener = new ButtonListener();
+		center = new JPanel();
+		center.setLayout(new GridLayout(BOARD_SIZE, BOARD_SIZE));
+		board = new JButton[BOARD_SIZE][BOARD_SIZE];
+		
+		model = new ChessModel();
+		
+		boolean white = true;
+		
+		for (int row = 0; row < BOARD_SIZE; row++) {
+			white = !white;
+			for (int col = 0; col < BOARD_SIZE; col++) {
+				
+				board[row][col] = new JButton("");
+				board[row][col].setPreferredSize(new Dimension(90, 90));
+				board[row][col].addActionListener(listener);
+				center.add(board[row][col]);
+				if (white)
+					board[row][col].setBackground(Color.WHITE);
+				else
+					board[row][col].setBackground(Color.DARK_GRAY);
+				white = !white;
+			}
+		}
+		
+		add(center, BorderLayout.CENTER);
+		displayBoard();
+	}
+
+	   // method that updates the board
+	private void displayBoard() {
+		for (int row = 0; row < BOARD_SIZE; row++) {
+			for (int col = 0; col < BOARD_SIZE; col++) {
+				if (model.pieceAt(row, col) != null){
+					if (model.pieceAt(row, col).player() == Player.WHITE ){
+						if (model.pieceAt(row, col).type().equals("Pawn"))
+							board[col][row].setIcon(pawn);
+						if (model.pieceAt(row, col).type().equals("Rook"))
+							board[col][row].setIcon(rook);
+						if (model.pieceAt(row, col).type().equals("Knight"))
+							board[col][row].setIcon(knight);
+						if (model.pieceAt(row, col).type().equals("Bishop"))
+							board[col][row].setIcon(bishop);
+						if (model.pieceAt(row, col).type().equals("King"))
+							board[col][row].setIcon(king);
+						if (model.pieceAt(row, col).type().equals("Queen"))
+							board[col][row].setIcon(queen);
+					}
+					else if (model.pieceAt(row, col).player() == Player.BLACK ){
+						if (model.pieceAt(row, col).type().equals("Pawn"))
+							board[col][row].setIcon(pawnB);
+						if (model.pieceAt(row, col).type().equals("Rook"))
+							board[col][row].setIcon(rookB);
+						if (model.pieceAt(row, col).type().equals("Knight"))
+							board[col][row].setIcon(knightB);
+						if (model.pieceAt(row, col).type().equals("Bishop"))
+							board[col][row].setIcon(bishopB);
+						if (model.pieceAt(row, col).type().equals("King"))
+							board[col][row].setIcon(kingB);
+						if (model.pieceAt(row, col).type().equals("Queen"))
+							board[col][row].setIcon(queenB);
+					}
+				}
+			else
+				board[col][row].setIcon(null);
+				
+			}
+		}
+	}
+
+	   // add other helper methods as needed
+
+	   // inner class that represents action listener for buttons
+	private class ButtonListener implements ActionListener {
+
+		public void actionPerformed(ActionEvent event) {
+			for (int r = 0; r < BOARD_SIZE; r++)
+				for (int c = 0; c < BOARD_SIZE; c++)
+					if (board[r][c] == event.getSource()){
+						if (model.isFirstMove()) {
+							rowMove = r;
+							colMove = c;
+							model.setFirstMove(false);
+//							highlight();
+						}
+						else if (!model.isFirstMove()) {
+							move = new Move(colMove ,rowMove, r, c);
+							if (model.isValidMove(move))
+								model.move(move);
+							displayBoard();
+							model.setFirstMove(true);
+							
+						}
+						
+					}
+		}
+	}
+}
