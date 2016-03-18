@@ -1,1 +1,33 @@
+package chess;
+
+public class Knight extends ChessPiece {
+	
+	private final int PIECE_WORTH = 3;
+
+	protected Knight(Player player) {
+		super(player);
+		// TODO Auto-generated constructor stub
+	}
+
+	@Override
+	public String type() {
+		return "Knight";
+	}
+	
+	@Override
+	public int getPieceWorth() {
+		return PIECE_WORTH;
+	}
+
+	@Override
+	public boolean isValidMove(Move move, IChessPiece[][] board) {
+		if (super.isValidMove(move, board))
+
+			if ((Math.abs(move.toColumn - move.fromColumn) == 2 && Math.abs(move.toRow - move.fromRow) == 1) || 
+					(Math.abs(move.toColumn - move.fromColumn) == 1 && Math.abs(move.toRow - move.fromRow) == 2))
+				return true;
+
+		return false;
+	}
+}
 
