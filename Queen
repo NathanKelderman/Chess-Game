@@ -1,1 +1,99 @@
+package chess;
+
+public class Queen extends ChessPiece {
+	
+	private final int PIECE_WORTH = 9;
+
+	protected Queen(Player player) {
+		super(player);
+		// TODO Auto-generated constructor stub
+	}
+
+	@Override
+	public String type() {
+		// TODO Auto-generated method stub
+		return "Queen";
+	}
+	
+	@Override
+	public int getPieceWorth() {
+		return PIECE_WORTH;
+	}
+
+	@Override
+	public boolean isValidMove(Move move, IChessPiece[][] board) {
+		if (super.isValidMove(move, board)) {
+			if ((move.fromRow > move.toRow) && move.fromColumn == move.toColumn) { //move.fromRow < move.toRow ||
+				for (int row = (move.fromRow - 1); row > move.toRow; row--) {
+					if (board[row][move.fromColumn] != null) {
+						return false;
+					}
+				}
+				return true;
+			}
+			else if ((move.fromRow < move.toRow) && move.fromColumn == move.toColumn) {
+				for (int row = (move.fromRow + 1); row < move.toRow; row++) {
+					if (board[row][move.fromColumn] != null) {
+						return false;
+					}
+				}
+				return true;
+			}
+			else if ((move.fromColumn < move.toColumn) && move.fromRow == move.toRow) {
+				for (int col = (move.fromColumn + 1); col < move.toColumn; col++) {
+					if (board[move.fromRow][col] != null) {
+						return false;
+					}
+				}
+				return true;
+			}
+			else if ((move.fromColumn > move.toColumn) && move.fromRow == move.toRow) {
+				for (int col = (move.fromColumn - 1); col > move.toColumn; col--) {
+					if (board[move.fromRow][col] != null) {
+						return false;
+					}
+				}
+				return true;
+			}
+			if (move.fromColumn < move.toColumn && move.fromRow < move.toRow
+					&& (move.toRow - move.fromRow) == (move.toColumn - move.fromColumn)) {
+				for (int row = (move.fromRow + 1); row < move.toRow; row++)
+					for (int col = (move.fromColumn + 1); col < move.toColumn; col++)
+						if (board[row][col] != null && (row - move.fromRow) == (col - move.fromColumn)) {
+							return false;
+						}
+				return true;
+			}
+			else if (move.fromColumn > move.toColumn && move.fromRow > move.toRow
+					&& (move.fromRow - move.toRow) == (move.fromColumn -  move.toColumn)) {
+				for (int row = (move.fromRow - 1); row > move.toRow; row--)
+					for (int col = (move.fromColumn - 1); col > move.toColumn; col--)
+						if (board[row][col] != null && (move.fromRow - row) == (move.fromColumn - col)) {
+							return false;
+						}
+				return true;
+			}
+			else if (move.fromColumn < move.toColumn && move.fromRow > move.toRow
+					&& (move.fromRow - move.toRow) == (move.toColumn - move.fromColumn)) {
+				for (int row = (move.fromRow - 1); row > move.toRow; row--)
+					for (int col = (move.fromColumn + 1); col < move.toColumn; col++)
+						if (board[row][col] != null && (move.fromRow - row) == (col - move.fromColumn)) {
+							return false;
+						}
+				return true;
+			}
+			else if (move.fromColumn > move.toColumn && move.fromRow < move.toRow
+					&& (move.toRow - move.fromRow) == (move.fromColumn - move.toColumn)) {
+				for (int row = (move.fromRow + 1); row < move.toRow; row++)
+					for (int col = (move.fromColumn - 1); col > move.toColumn; col--)
+						if (board[row][col] != null && (row - move.fromRow) == (move.fromColumn - col)) {
+							return false;
+						}
+				return true;
+			}
+		}
+		return false;
+	}
+
+}
 
