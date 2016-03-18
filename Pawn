@@ -3,6 +3,8 @@ package chess;
 public class Pawn extends ChessPiece {
 
 	private boolean startingPosition = true;
+	
+	private final int PIECE_WORTH = 1;
 
 	protected Pawn(Player player) {
 		super(player);
@@ -12,6 +14,11 @@ public class Pawn extends ChessPiece {
 	@Override
 	public String type() {
 		return "Pawn";
+	}
+	
+	@Override
+	public int getPieceWorth() {
+		return PIECE_WORTH;
 	}
 
 	@Override
@@ -38,7 +45,7 @@ public class Pawn extends ChessPiece {
 								}
 						}
 						else 
-							if (board[move.toRow][move.toColumn] == board[move.fromRow+1][move.fromColumn-1])
+							if (board[move.toRow][move.toColumn] == board[move.fromRow-1][move.fromColumn-1])
 
 								if (move.toRow == (move.fromRow - 1)) {
 									startingPosition = false;
@@ -65,25 +72,25 @@ public class Pawn extends ChessPiece {
 								startingPosition = false;
 								return true;
 							}
-							else 
-								if (move.fromColumn == 0) {
-									if (board[move.toRow][move.toColumn] == board[move.fromRow+1][move.fromColumn-1])
-
-										if (move.toRow == (move.fromRow - 1)) {
-											startingPosition = false;
-											return true;
-										}
-								}
-								else 
-									if (board[move.toRow][move.toColumn] == board[move.fromRow+1][move.fromColumn+1])
-
-										if (move.toRow == (move.fromRow - 1)) {
-											startingPosition = false;
-											return true;
-										}
 					}
+					else 
+						if (move.fromColumn == 0) {
+							if (board[move.toRow][move.toColumn] == board[move.fromRow+1][move.fromColumn+1])
+
+								if (move.toRow == (move.fromRow + 1)) {
+									startingPosition = false;
+									return true;
+								}
+						}
+						else 
+							if (board[move.toRow][move.toColumn] == board[move.fromRow+1][move.fromColumn-1])
+
+								if (move.toRow == (move.fromRow + 1)) {
+									startingPosition = false;
+									return true;
+								}
 				}
-				else 
+				else {
 					if (startingPosition && move.toRow == (move.fromRow + 2) && move.toColumn == move.fromColumn) {
 						startingPosition = false;
 						return true;
@@ -92,7 +99,8 @@ public class Pawn extends ChessPiece {
 						startingPosition = false;
 						return true;
 					}
+				}
 		return false;
 	}
-}
 
+}
