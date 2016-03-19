@@ -1,0 +1,48 @@
+package chess;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+
+public class ChessGUI {
+
+	private static JMenuBar menuBar;
+	private static JMenu menu;
+	private static JMenuItem menuNewGame;
+	private static JMenuItem menuExit;
+
+	public static void main(String[] args) {
+		JFrame frame = new JFrame("Chess Game");
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+		ChessPanel panel = new ChessPanel();
+		frame.getContentPane().add(panel);
+
+		frame.setSize(740, 766);
+		frame.setLocationRelativeTo(null);
+		frame.setVisible(true);
+
+		class MenuActionListener implements ActionListener {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (e.getSource() == menuExit)
+					System.exit(0);
+			}
+		}
+
+		menuBar = new JMenuBar();
+		menu = new JMenu("Options");
+		menuBar.add(menu);
+		menuNewGame = new JMenuItem("New Game");
+		menuNewGame.addActionListener(new MenuActionListener());
+		menu.add(menuNewGame);
+		menuExit= new JMenuItem("Exit");
+		menuExit.addActionListener(new MenuActionListener());
+		menu.add(menuExit);
+		frame.setJMenuBar(menuBar);
+	}
+}
