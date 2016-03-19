@@ -29,6 +29,9 @@ public class ChessGUI {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				if (e.getSource() == menuNewGame)
+					panel.reset();
+				
 				if (e.getSource() == menuExit)
 					System.exit(0);
 			}
