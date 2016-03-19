@@ -1,19 +1,39 @@
 package chess;
 
+import java.util.ArrayList;
+import java.util.Collections;
+
+
 import javax.swing.JOptionPane;
 
 public class ChessModel implements IChessModel {
-	
+
 	private IChessPiece[][] board;
 	private Player player;
 	private final int BOARD_SIZE = 8;
 	private boolean firstMove;
-//  declare other instance variables as needed
+
+	private int numMoves;
+	private int fourMoves;
+	private boolean randomLoop;
+	private ArrayList<Integer> randomList; // I added these
+
+	private Move bestMove;
+	private Move tempMove;
+
+	//  declare other instance variables as needed
 
 	public ChessModel() {
 
 		board = new IChessPiece[BOARD_SIZE][BOARD_SIZE];
-		
+
+		numMoves = 0;
+		fourMoves = 0;
+		randomLoop = true;
+		randomList = new ArrayList<Integer>(8);
+
+		tempMove = null;
+
 		player = Player.BLACK; // setting the AI to black
 		board[0][0] = new Rook(player);
 		board[0][1] = new Knight(player);
@@ -23,10 +43,10 @@ public class ChessModel implements IChessModel {
 		board[0][5] = new Bishop(player);
 		board[0][6] = new Knight(player);
 		board[0][7] = new Rook(player);
-		
+
 		for(int col = 0; col < 8; col++)
 			board[1][col] = new Pawn(player);
-		
+
 		player = Player.WHITE;
 		board[7][0] = new Rook(player);
 		board[7][1] = new Knight(player);
@@ -39,7 +59,7 @@ public class ChessModel implements IChessModel {
 
 		for(int col = 0; col < 8; col++)
 			board[6][col] = new Pawn(player);
-		
+
 		setFirstMove(true);
 	}
 
@@ -56,20 +76,74 @@ public class ChessModel implements IChessModel {
 	}
 
 	public boolean isValidMove(Move move) {
-		if (pieceAt(move.fromRow, move.fromColumn) != null)
-			return true;
-		
-		JOptionPane.showMessageDialog(null, "Not a valid move!");
+
+		if (board[move.fromRow][move.fromColumn] == null) {
+			JOptionPane.showMessageDialog(null, "You must click a piece!");
+			return false;
+		}
+
+
+		if ((pieceAt(move.fromRow, move.fromColumn) != null))
+			//if ()
+			if (board[move.fromRow][move.fromColumn].isValidMove(move, board)) {
+
+				player = player.next();
+				return true;
+			}
+
+		if (board[move.fromRow][move.fromColumn].player() != player) {
+			JOptionPane.showMessageDialog(null, "It is not your turn!");
+			return false;
+		}
+
+		if (board[move.fromRow][move.fromColumn] == null) {
+			JOptionPane.showMessageDialog(null, "You must click a piece!");
+			return false;
+		}
+		else 
+
+			//	JOptionPane.showMessageDialog(null, "Not a valid move!", board[move.fromRow][move.fromColumn].type(), JOptionPane.INFORMATION_MESSAGE, pawn);
+			JOptionPane.showMessageDialog(null, "Not a valid move! (" + board[move.fromRow][move.fromColumn].type() + ")");
 		return false;
 		// complete this comes from panel to see if first clicked spot isnt null and and right color.
 	}
 
 	public void move(Move move) {
+
 		board[move.toRow][move.toColumn] = board[move.fromRow][move.fromColumn];
+		int tempFromR = move.fromRow;
+		int tempFromC = move.fromColumn;
 		board[move.fromRow][move.fromColumn] = null;
+		
+		if ( player == Player.WHITE && inCheck(Player.BLACK)){
+			JOptionPane.showMessageDialog(null, "Black in check!");
+			board[move.fromRow][move.fromColumn] = board[tempFromR][tempFromC];
+			board[move.toRow][move.toColumn] = null;
+		}
+		if ( player == Player.BLACK && inCheck(Player.WHITE)) {
+			JOptionPane.showMessageDialog(null, "White in check!");
+			board[move.fromRow][move.fromColumn] = board[tempFromR][tempFromC];
+			board[move.toRow][move.toColumn] = null;
+		}
+		if ( !inCheck(Player.BLACK) && !inCheck(Player.WHITE)){
+			board[move.fromRow][move.fromColumn] = board[tempFromR][tempFromC];
+		}
 	}
 
 	public boolean inCheck(Player p) {
+		for (int row = 0; row < BOARD_SIZE; row++)
+			for (int col = 0; col < BOARD_SIZE; col++) {
+				if ( board[row][col] != null) 
+					if ( board[row][col].player() != p){
+						for (int r = 0; r < BOARD_SIZE; r++)
+							for (int c = 0; c < BOARD_SIZE; c++) {
+								Move temp = new Move(row, col, r, c);
+								if (isValidMoveAI(temp) && board[r][c] != null)
+									if (board[r][c].player() == p && board[r][c].type().equals("King"))
+										return true;
+							}
+					}
+			}
 		return false;
 	}
 
@@ -88,6 +162,118 @@ public class ChessModel implements IChessModel {
 	public IChessPiece pieceAt(int row, int col) {
 		return board[row][col];
 	}
-	
-	// add other public or helper methods as needed
+
+	public Move ChessAIMove() {
+
+		int moveValue = 0;
+		bestMove = tempMove;
+
+		for (int i = 0; (i < 8) && randomLoop; i++) { 
+			randomList.add(i); 
+		} 
+		if (randomLoop)
+			Collections.shuffle(randomList);
+
+		randomLoop = false;
+
+		if (numMoves < 4) {
+			switch (randomList.get(fourMoves)) {
+			case 0: bestMove = new Move(0, 1, 2, 0);
+			tempMove = new Move(0, 1, 2, 0);
+			fourMoves++;
+			break;
+			case 1: bestMove = new Move(1, 1, 3, 1);
+			tempMove = new Move(1, 1, 3, 1);
+			fourMoves++;
+			break;
+			case 2: bestMove = new Move(1, 3, 2, 3);
+			tempMove = new Move(1, 3, 2, 3);
+			fourMoves++;
+			break;
+			case 3: bestMove = new Move(0, 6, 2, 5);
+			tempMove = new Move(0, 6, 2, 5);
+			fourMoves++;
+			break;	
+			case 4: bestMove = new Move(1, 3, 3, 3);
+			tempMove = new Move(1, 3, 3, 3);
+			fourMoves++;
+			break;
+			case 5: bestMove = new Move(1, 4, 2, 4);
+			tempMove = new Move(1, 4, 2, 4);
+			fourMoves++;
+			break;
+			case 6: bestMove = new Move(1, 6, 2, 6);
+			tempMove = new Move(1, 6, 2, 6);
+			fourMoves++;
+			break;
+			case 7: bestMove = new Move(1, 7, 3, 7);
+			tempMove = new Move(1, 7, 3, 7);
+			fourMoves++;
+			break;
+			}
+		}
+		else
+			for (int row = 0; row < BOARD_SIZE; row++)
+				for (int col = 0; col < BOARD_SIZE; col++) {
+					if ( board[row][col] != null) 
+						if ( board[row][col].player() == player.BLACK){
+							int temp = ChessAI(board[row][col]);
+							if (temp > moveValue) {
+								moveValue = temp;
+								bestMove = tempMove;
+							}
+						}
+				}
+		player = player.next();
+		numMoves++;
+		return bestMove;
+	}
+
+	public int ChessAI(IChessPiece AIBoard) {
+
+		int moveValue = -1;
+		int tempValue = -1;
+
+		for (int row = 0; row < BOARD_SIZE; row++) {
+			for (int col = 0; col < BOARD_SIZE; col++) {
+				if (board[row][col] == AIBoard)
+					for (int r = 0; r < BOARD_SIZE; r++) {
+						for (int c = 0; c < BOARD_SIZE; c++) {
+							if (r == tempMove.fromRow && c == tempMove.fromColumn)
+								break;
+							Move temp = new Move(row, col, r, c);
+							if (isValidMoveAI(temp)) {
+								if (pieceAt(r, c) != null && pieceAt(r, c).type().equals("Pawn") && 
+										pieceAt(row, col).type().equals("Pawn"))
+									moveValue = 15;
+								else if (pieceAt(r, c) != null && pieceAt(r, c).type().equals(pieceAt(row, col).type()))
+									moveValue = AIBoard.getPieceWorth() * board[r][c].getPieceWorth();
+								else if(pieceAt(r, c) != null)
+									moveValue = AIBoard.getPieceWorth() + board[r][c].getPieceWorth();
+								else
+									moveValue = AIBoard.getPieceWorth();
+
+								if (moveValue > tempValue) {
+									tempValue = moveValue;
+									tempMove = temp;
+								}
+							}
+						}
+					}
+			}
+		}
+		return tempValue;
+	}
+
+	public boolean isValidMoveAI(Move move) {
+
+		if ((pieceAt(move.fromRow, move.fromColumn) != null))
+			if (board[move.fromRow][move.fromColumn].isValidMove(move, board))
+				return true;
+
+		if (board[move.fromRow][move.fromColumn] == null)
+			return false;
+
+		return false;
+	}
 }
