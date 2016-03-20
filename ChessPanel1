@@ -11,53 +11,55 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 
 public class ChessPanel extends JPanel {
-	
-	private JButton[][] board;   
-	private ChessModel model;
-	private JPanel center;private ImageIcon rook = new ImageIcon("C:\\Users\\Nathan\\Chess"
+
+	private JButton[][] board; 
+	private ImageIcon rook = new ImageIcon("C:\\Users\\Nathan\\Chess"
 			+ "\\src\\rook.png");
 	private ImageIcon pawn = new ImageIcon("C:\\Users\\Nathan\\Chess"
-		+ "\\src\\pawn.png");
+			+ "\\src\\pawn.png");
 	private ImageIcon bishop = new ImageIcon("C:\\Users\\Nathan\\Chess"
-		+ "\\src\\bishop.png");
+			+ "\\src\\bishop.png");
 	private ImageIcon knight = new ImageIcon("C:\\Users\\Nathan\\Chess"
-		+ "\\src\\knight.png");
+			+ "\\src\\knight.png");
 	private ImageIcon queen = new ImageIcon("C:\\Users\\Nathan\\Chess"
-		+ "\\src\\queen.png");
+			+ "\\src\\queen.png");
 	private ImageIcon king = new ImageIcon("C:\\Users\\Nathan\\Chess"
-		+ "\\src\\king.png");
+			+ "\\src\\king.png");
 
 	private ImageIcon rookB = new ImageIcon("C:\\Users\\Nathan\\Chess"
-		+ "\\src\\rookB.png");
+			+ "\\src\\rookB.png");
 	private ImageIcon pawnB = new ImageIcon("C:\\Users\\Nathan\\Chess"
-		+ "\\src\\pawnB.png");
+			+ "\\src\\pawnB.png");
 	private ImageIcon bishopB = new ImageIcon("C:\\Users\\Nathan\\Chess"
-		+ "\\src\\bishopB.png");
+			+ "\\src\\bishopB.png");
 	private ImageIcon knightB = new ImageIcon("C:\\Users\\Nathan\\Chess"
-		+ "\\src\\knightB.png");
+			+ "\\src\\knightB.png");
 	private ImageIcon queenB = new ImageIcon("C:\\Users\\Nathan\\Chess"
-		+ "\\src\\queenB.png");
+			+ "\\src\\queenB.png");
 	private ImageIcon kingB = new ImageIcon("C:\\Users\\Nathan\\Chess"
 			+ "\\src\\kingB.png");
 
+
+	private Move move;
+	private ChessModel model;
+	private JPanel center;
 	private final int BOARD_SIZE = 8;
-	
-	
+
+
 	public ChessPanel() {
-		
+
 		ButtonListener listener = new ButtonListener();
 		center = new JPanel();
 		center.setLayout(new GridLayout(BOARD_SIZE, BOARD_SIZE));
 		board = new JButton[BOARD_SIZE][BOARD_SIZE];
-		
+
 		model = new ChessModel();
-		
+
 		boolean white = true;
-		
-		for (int row = 0; row < BOARD_SIZE; row++) {
+
+		for (int row = 0; row < model.numRows(); row++) {
 			white = !white;
-			for (int col = 0; col < BOARD_SIZE; col++) {
-				
+			for (int col = 0; col < model.numColumns(); col++) {
 				board[row][col] = new JButton("");
 				board[row][col].setPreferredSize(new Dimension(90, 90));
 				board[row][col].addActionListener(listener);
@@ -69,56 +71,92 @@ public class ChessPanel extends JPanel {
 				white = !white;
 			}
 		}
-		
+
 		add(center, BorderLayout.CENTER);
 		displayBoard();
 	}
 
-	   // method that updates the board
+	// method that updates the board
 	private void displayBoard() {
-		for (int row = 0; row < BOARD_SIZE; row++) {
-			for (int col = 0; col < BOARD_SIZE; col++) {
+		for (int row = 0; row < model.numRows(); row++) {
+			for (int col = 0; col < model.numColumns(); col++) {
 				if (model.pieceAt(row, col) != null){
 					if (model.pieceAt(row, col).player() == Player.WHITE ){
 						if (model.pieceAt(row, col).type().equals("Pawn"))
-							board[col][row].setIcon(pawn);
+							board[row][col].setIcon(pawn);
 						if (model.pieceAt(row, col).type().equals("Rook"))
-							board[col][row].setIcon(rook);
+							board[row][col].setIcon(rook);
 						if (model.pieceAt(row, col).type().equals("Knight"))
-							board[col][row].setIcon(knight);
+							board[row][col].setIcon(knight);
 						if (model.pieceAt(row, col).type().equals("Bishop"))
-							board[col][row].setIcon(bishop);
+							board[row][col].setIcon(bishop);
 						if (model.pieceAt(row, col).type().equals("King"))
-							board[col][row].setIcon(king);
+							board[row][col].setIcon(king);
 						if (model.pieceAt(row, col).type().equals("Queen"))
-							board[col][row].setIcon(queen);
+							board[row][col].setIcon(queen);
 					}
 					else if (model.pieceAt(row, col).player() == Player.BLACK ){
 						if (model.pieceAt(row, col).type().equals("Pawn"))
-							board[col][row].setIcon(pawnB);
+							board[row][col].setIcon(pawnB);
 						if (model.pieceAt(row, col).type().equals("Rook"))
-							board[col][row].setIcon(rookB);
+							board[row][col].setIcon(rookB);
 						if (model.pieceAt(row, col).type().equals("Knight"))
-							board[col][row].setIcon(knightB);
+							board[row][col].setIcon(knightB);
 						if (model.pieceAt(row, col).type().equals("Bishop"))
-							board[col][row].setIcon(bishopB);
+							board[row][col].setIcon(bishopB);
 						if (model.pieceAt(row, col).type().equals("King"))
-							board[col][row].setIcon(kingB);
+							board[row][col].setIcon(kingB);
 						if (model.pieceAt(row, col).type().equals("Queen"))
-							board[col][row].setIcon(queenB);
+							board[row][col].setIcon(queenB);
 					}
 				}
+				else
+					board[row][col].setIcon(null);
+
 			}
 		}
 	}
 
-	   // add other helper methods as needed
+	public void reset() {
+		model.reset();
+		displayBoard();
+	}
 
-	   // inner class that represents action listener for buttons
+	// add other helper methods as needed
+
+	// inner class that represents action listener for buttons
 	private class ButtonListener implements ActionListener {
 
+		private int colMove = 0;
+		private int rowMove = 0;
+
 		public void actionPerformed(ActionEvent event) {
-		 // complete this
+			for (int row = 0; row < model.numRows(); row++)
+				for (int col = 0; col < model.numColumns(); col++)
+					if (board[row][col] == event.getSource()){
+						if (model.isCellOccupied(model.pieceAt(row, col)) || model.isFirstMove() == false){
+
+							if (model.isFirstMove()) {
+								rowMove = row;
+								colMove = col;
+								model.setFirstMove(false);
+								//							highlight();
+								
+							}
+							else if (!model.isFirstMove()) {
+								move = new Move(rowMove, colMove, row, col);
+								if (model.isValidMove(move)) {
+									model.move(move);
+									displayBoard();
+									//model.setFirstMove(true);
+									model.move(model.ChessAIMove());
+									displayBoard();
+								}
+								model.setFirstMove(true);
+								//displayBoard();
+							}
+						}
+					}
 		}
 	}
 }
