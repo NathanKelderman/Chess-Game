@@ -8,12 +8,21 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 public class ChessPanel extends JPanel {
 
-	private JButton[][] board; 
+	private static final long serialVersionUID = 7659163831895615217L;
 
+	private JButton[][] board;
+	private Move move;
+	private ChessModel model;
+	private JPanel center;
+	private final int BOARD_SIZE = 8;
+
+	private ImageIcon warningIcon = new ImageIcon("/home/matthew/"
+			+ "workspace/ChessPrj/src/chess/warningIcon.png");
 	private ImageIcon rook = new ImageIcon("/home/matthew/workspace/"
 			+ "ChessPrj/src/chess/White/rook.png");
 	private ImageIcon pawn = new ImageIcon("/home/matthew/workspace/"
@@ -38,12 +47,6 @@ public class ChessPanel extends JPanel {
 			+ "ChessPrj/src/chess/Black/queenB.png");
 	private ImageIcon kingB = new ImageIcon("/home/matthew/workspace/"
 			+ "ChessPrj/src/chess/Black/kingB.png");
-
-	private Move move;
-	private ChessModel model;
-	private JPanel center;
-	private final int BOARD_SIZE = 8;
-
 
 	public ChessPanel() {
 
@@ -116,7 +119,10 @@ public class ChessPanel extends JPanel {
 		}
 	}
 
-	// add other helper methods as needed
+	public void reset() {
+		model.reset();
+		displayBoard();
+	}
 
 	// inner class that represents action listener for buttons
 	private class ButtonListener implements ActionListener {
@@ -128,23 +134,77 @@ public class ChessPanel extends JPanel {
 			for (int row = 0; row < model.numRows(); row++)
 				for (int col = 0; col < model.numColumns(); col++)
 					if (board[row][col] == event.getSource()){
-						if (model.isFirstMove()) {
-							rowMove = row;
-							colMove = col;
-							model.setFirstMove(false);
-							//							highlight();
-						}
-						else if (!model.isFirstMove()) {
-							move = new Move(rowMove, colMove, row, col);
-							if (model.isValidMove(move)) {
-								model.move(move);
-								displayBoard();
-								//model.setFirstMove(true);
-								model.move(model.ChessAIMove());
-								displayBoard();
+						if (model.isCellOccupied(model.pieceAt(row, col)) || model.isFirstMove() == false) {
+
+							if (model.isFirstMove()) {
+								rowMove = row;
+								colMove = col;
+								model.setFirstMove(false);
+								// highlight();
+
 							}
-							model.setFirstMove(true);
-							//displayBoard();
+							else if (!model.isFirstMove()) {
+								move = new Move(rowMove, colMove, row, col);
+
+								try {
+									if (model.isValidMove(move)) {
+										model.move(move);
+										displayBoard();
+
+										if(!model.isInCheck()) {
+											model.move(model.ChessAIMove());
+											displayBoard();
+										}
+									}
+								}
+
+								catch (IllegalArgumentException e) {
+									if (model.currentPlayer() == Player.WHITE) 
+										JOptionPane.showMessageDialog(null, "It is not your turn!", "Black", JOptionPane.INFORMATION_MESSAGE, warningIcon);
+									else 
+										JOptionPane.showMessageDialog(null, "It is not your turn!", "White", JOptionPane.INFORMATION_MESSAGE, warningIcon);
+								}
+
+								catch (invalidMove e) {   //NullPointerException e) {
+									if (model.currentPlayer() == Player.WHITE) {
+										if (model.pieceAt(move.fromRow, move.fromColumn).type().equals("Pawn"))
+											JOptionPane.showMessageDialog(null, "Not a valid move!", model.pieceAt(move.fromRow, move.fromColumn).type(), JOptionPane.INFORMATION_MESSAGE, pawn);
+										if (model.pieceAt(move.fromRow, move.fromColumn).type().equals("Rook"))
+											JOptionPane.showMessageDialog(null, "Not a valid move!", model.pieceAt(move.fromRow, move.fromColumn).type(), JOptionPane.INFORMATION_MESSAGE, rook);
+										if (model.pieceAt(move.fromRow, move.fromColumn).type().equals("Knight"))
+											JOptionPane.showMessageDialog(null, "Not a valid move!", model.pieceAt(move.fromRow, move.fromColumn).type(), JOptionPane.INFORMATION_MESSAGE, knight);
+										if (model.pieceAt(move.fromRow, move.fromColumn).type().equals("Bishop"))
+											JOptionPane.showMessageDialog(null, "Not a valid move!", model.pieceAt(move.fromRow, move.fromColumn).type(), JOptionPane.INFORMATION_MESSAGE, bishop);
+										if (model.pieceAt(move.fromRow, move.fromColumn).type().equals("Queen"))
+											JOptionPane.showMessageDialog(null, "Not a valid move!", model.pieceAt(move.fromRow, move.fromColumn).type(), JOptionPane.INFORMATION_MESSAGE, queen);
+										if (model.pieceAt(move.fromRow, move.fromColumn).type().equals("King"))
+											JOptionPane.showMessageDialog(null, "Not a valid move!", model.pieceAt(move.fromRow, move.fromColumn).type(), JOptionPane.INFORMATION_MESSAGE, king);
+									}
+									else
+										JOptionPane.showMessageDialog(null, "Not a valid move! (" + model.pieceAt(move.fromRow, move.fromColumn).type() + ")");
+								}
+
+								catch (ArithmeticException e) {
+									if (model.currentPlayer() == Player.WHITE) {
+										JOptionPane.showMessageDialog(null, "White in check!");
+
+										if(!model.isInCheck()) {
+											model.move(model.ChessAIMove());
+											displayBoard();
+										}
+									}
+									else {
+										JOptionPane.showMessageDialog(null, "Black in check!");
+										
+										if(!model.isInCheck()) {
+											model.move(model.ChessAIMove());
+											displayBoard();
+										}
+									}
+								}
+
+								model.setFirstMove(true);
+							}
 						}
 					}
 		}
