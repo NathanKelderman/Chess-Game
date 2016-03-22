@@ -1,0 +1,400 @@
+
+import java.util.ArrayList;
+import java.util.Collections;
+
+public class ChessModel implements IChessModel {
+
+	private IChessPiece[][] board;
+	private Player player;
+	private final int BOARD_SIZE = 8;
+	private boolean firstMove;
+	private int numMoves;	
+	private ArrayList <Move> randomMoves;
+	private Move bestMove;
+	private Move tempMove;
+	private IChessPiece[][] tempBoard;
+	
+	private boolean wKnight1;
+	private boolean wKnight2;
+	private boolean wKing;
+	private boolean bKnight1;
+	private boolean bKnight2;
+	private boolean bKing;
+	
+
+	public ChessModel() {		
+		reset();
+	}	
+
+	public void reset() {
+		board = new IChessPiece[BOARD_SIZE][BOARD_SIZE];
+		numMoves = 0;
+		tempMove = null;
+
+		tempBoard = new IChessPiece[BOARD_SIZE][BOARD_SIZE];
+
+
+		player = Player.BLACK; // setting the AI to black
+		board[0][0] = new Rook(player);
+		board[0][1] = new Knight(player);
+		board[0][2] = new Bishop(player);
+		board[0][3] = new Queen(player);
+		board[0][4] = new King(player);
+		board[0][5] = new Bishop(player);
+		board[0][6] = new Knight(player);
+		board[0][7] = new Rook(player);
+
+		for(int col = 0; col < 8; col++)
+			board[1][col] = new Pawn(player);
+
+		player = Player.WHITE;
+		board[7][0] = new Rook(player);
+		board[7][1] = new Knight(player);
+		board[7][2] = new Bishop(player);
+		board[7][3] = new Queen(player);
+		board[7][4] = new King(player);
+		board[7][5] = new Bishop(player);
+		board[7][6] = new Knight(player);
+		board[7][7] = new Rook(player);
+
+		for(int col = 0; col < 8; col++)
+			board[6][col] = new Pawn(player);
+
+		randomMoves = new ArrayList<Move>();
+		randomMoves.add(new Move(0, 1, 2, 0));
+		randomMoves.add(new Move(1, 1, 3, 1));
+		randomMoves.add(new Move(1, 3, 2, 3));
+		randomMoves.add(new Move(0, 6, 2, 5));
+		randomMoves.add(new Move(0, 2, 5, 3));
+		randomMoves.add(new Move(1, 4, 2, 4));
+		randomMoves.add(new Move(1, 6, 2, 6));
+		randomMoves.add(new Move(1, 7, 3, 7));
+		Collections.shuffle(randomMoves);
+
+		setFirstMove(true);
+	}
+
+	public boolean isCellOccupied(IChessPiece temp){
+		if (temp != null)
+			return true;
+		return false;
+	}
+
+	public boolean isFirstMove() {
+		return firstMove;
+	}
+
+	public void setFirstMove(boolean firstMove) {
+		this.firstMove = firstMove;
+	}
+
+	public boolean isValidMove(Move move) {
+		
+		duplicateBoard(board);
+		
+		if (tempBoard[move.fromRow][move.fromColumn].player() != player) {
+			throw new IllegalArgumentException();
+		}
+
+		if (tempBoard[move.fromRow][move.fromColumn].isValidMove(move, tempBoard)) {
+			return true;
+		}
+		else 
+			throw new invalidMove();//throw new NullPointerException();
+	}
+
+	public void move(Move move) {
+
+		IChessPiece temp1 = board[move.toRow][move.toColumn];
+		IChessPiece temp = board[move.fromRow][move.fromColumn];
+		board[move.toRow][move.toColumn] = board[move.fromRow][move.fromColumn];
+		board[move.fromRow][move.fromColumn] = null;
+		boolean black = inCheck(Player.BLACK);
+		boolean white = inCheck(Player.WHITE);
+		boolean blackCM = isComplete(Player.BLACK);
+		boolean whiteCM = isComplete(Player.WHITE);
+
+		if (whiteCM || blackCM){
+			if (player == Player.WHITE && whiteCM) {
+				board[move.fromRow][move.fromColumn] = temp;
+				board[move.toRow][move.toColumn] = temp1;
+			}
+			if (player == Player.BLACK && blackCM) {
+				board[move.fromRow][move.fromColumn] = temp;
+				board[move.toRow][move.toColumn] = temp1;
+			} 
+			if (player == Player.WHITE && blackCM) {
+				board[move.fromRow][move.fromColumn] = null;
+				board[move.toRow][move.toColumn] = temp;
+				player = player.next(); 
+				throw new checkMate();
+			}
+			if (player == Player.BLACK && whiteCM) {
+				board[move.fromRow][move.fromColumn] = null;
+				board[move.toRow][move.toColumn] = temp;
+				player = player.next();
+				throw new checkMate();
+			}
+		}
+
+		else {
+
+			if (player == Player.WHITE && white) {
+				board[move.fromRow][move.fromColumn] = temp;
+				board[move.toRow][move.toColumn] = temp1;
+			}
+			else if (player == Player.BLACK && black) {
+				board[move.fromRow][move.fromColumn] = temp;
+				board[move.toRow][move.toColumn] = temp1;
+			} 
+			else {
+				if (player == Player.WHITE && black) {
+					board[move.fromRow][move.fromColumn] = null;
+					board[move.toRow][move.toColumn] = temp;
+					player = player.next(); 
+					throw new ArithmeticException();
+				}
+				if (player == Player.BLACK && white) {
+					board[move.fromRow][move.fromColumn] = null;
+					board[move.toRow][move.toColumn] = temp;
+					player = player.next();
+					throw new ArithmeticException();
+				}
+				if (!black && !white) {
+					board[move.toRow][move.toColumn] = temp;
+					player = player.next();
+				}
+			}
+		}
+	}
+
+	public boolean inCheck(Player p) {
+
+		duplicateBoard(board);
+
+		for (int row = 0; row < BOARD_SIZE; row++)
+			for (int col = 0; col < BOARD_SIZE; col++) {
+				if (tempBoard[row][col] != null) 
+					if (tempBoard[row][col].player() != p) {
+						for (int r = 0; r < BOARD_SIZE; r++)
+							for (int c = 0; c < BOARD_SIZE; c++) {
+								Move temp = new Move(row, col, r, c);
+								if (isValidMoveAI(temp) && board[r][c] != null)
+									if (tempBoard[r][c].player() == p && tempBoard[r][c].type().equals("King"))
+										return true;
+							}
+					}
+			}
+		return false;
+	}
+
+
+	public boolean inCheck1(Player p) {
+
+		for (int row = 0; row < BOARD_SIZE; row++)
+			for (int col = 0; col < BOARD_SIZE; col++) {
+				if (tempBoard[row][col] != null) 
+					if (tempBoard[row][col].player() != p) {
+						for (int r = 0; r < BOARD_SIZE; r++)
+							for (int c = 0; c < BOARD_SIZE; c++) {
+								Move temp = new Move(row, col, r, c);
+								if (isValidMoveCM(temp) && tempBoard[r][c] != null)
+									if (tempBoard[r][c].player() == p && tempBoard[r][c].type().equals("King"))
+										return true;
+							}
+					}
+			}
+		return false;
+	}
+
+	public boolean isComplete(Player p) {
+
+		duplicateBoard(board);
+
+		for (int row = 0; row < BOARD_SIZE; row++)
+			for (int col = 0; col < BOARD_SIZE; col++) {
+				if (tempBoard[row][col] != null) 
+					if (tempBoard[row][col].player() == p) {
+						for (int r = 0; r < BOARD_SIZE; r++)
+							for (int c = 0; c < BOARD_SIZE; c++) {
+								Move temp = new Move(row, col, r, c);
+								IChessPiece tempPiece = tempBoard[row][col];
+								IChessPiece tempPiece1 = null;
+								if ( tempBoard[r][c] != null)
+									tempPiece1 = tempBoard[r][c];
+								if (isValidMoveCM(temp) ) {
+									tempBoard[row][col] = null;
+									tempBoard[r][c] = tempPiece;
+
+									if (!inCheck1(p)){
+										tempBoard[row][col] = tempPiece;
+										tempBoard[r][c] = tempPiece1;
+										return false;
+									}
+								}
+								tempBoard[row][col] = tempPiece;
+								tempBoard[r][c] = tempPiece1;
+							}
+
+					}
+			}
+		return true;
+	}
+
+	public void duplicateBoard(IChessPiece[][] newBoard) {
+
+		tempBoard = new IChessPiece[BOARD_SIZE][BOARD_SIZE];
+
+		for (int row = 0; row < BOARD_SIZE; row++)
+			for (int col = 0; col < BOARD_SIZE; col++) {
+				if (board[row][col] != null ){
+					if (newBoard[row][col].type().equals("Pawn") && newBoard[row][col].player() == Player.WHITE){
+						tempBoard[row][col] = new Pawn(Player.WHITE);
+					}
+					else if (newBoard[row][col].type().equals("Pawn"))
+						tempBoard[row][col] = new Pawn(Player.BLACK);
+
+					if (newBoard[row][col].type().equals("Rook") && newBoard[row][col].player() == Player.WHITE)
+						tempBoard[row][col] = new Rook(Player.WHITE);
+					else if (newBoard[row][col].type().equals("Rook"))
+						tempBoard[row][col] = new Rook(Player.BLACK);
+
+					if (newBoard[row][col].type().equals("Bishop") && newBoard[row][col].player() == Player.WHITE)
+						tempBoard[row][col] = new Bishop(Player.WHITE);
+					else if (newBoard[row][col].type().equals("Bishop"))
+						tempBoard[row][col] = new Bishop(Player.BLACK);
+
+					if (newBoard[row][col].type().equals("Knight") && newBoard[row][col].player() == Player.WHITE)
+						tempBoard[row][col] = new Knight(Player.WHITE);
+					else if (newBoard[row][col].type().equals("Knight"))
+						tempBoard[row][col] = new Knight(Player.BLACK);
+
+					if (newBoard[row][col].type().equals("King") && newBoard[row][col].player() == Player.WHITE)
+						tempBoard[row][col] = new King(Player.WHITE);
+					else if (newBoard[row][col].type().equals("King"))
+						tempBoard[row][col] = new King(Player.BLACK);
+
+					if (newBoard[row][col].type().equals("Queen") && newBoard[row][col].player() == Player.WHITE)
+						tempBoard[row][col] = new Queen(Player.WHITE);
+					else if (newBoard[row][col].type().equals("Queen"))
+						tempBoard[row][col] = new Queen(Player.BLACK);
+				}
+			}
+	}
+
+
+	public Player currentPlayer() {
+		return player;
+	}
+
+	public int numRows() {
+		return BOARD_SIZE;
+	}
+
+	public int numColumns() {
+		return BOARD_SIZE;
+	}
+
+	public IChessPiece pieceAt(int row, int col) {
+		return board[row][col];
+	}
+
+	public Move ChessAIMove() {
+		if ( Player.BLACK == player){
+
+			IChessPiece[][] tempBoard = new IChessPiece[BOARD_SIZE][BOARD_SIZE];
+			tempBoard = board.clone();
+
+			int moveValue = 0;
+			bestMove = tempMove;
+
+			if (numMoves < 4) {
+				for (int i = numMoves; i < randomMoves.size(); i++)
+					if(isValidMoveAI(randomMoves.get(i))) {
+						bestMove = randomMoves.get(i);
+						tempMove = bestMove;
+						numMoves++;
+						return bestMove;
+					}			
+			}
+			else
+				for (int row = 0; row < BOARD_SIZE; row++)
+					for (int col = 0; col < BOARD_SIZE; col++) {
+						if ( tempBoard[row][col] != null) 
+							if ( tempBoard[row][col].player() == Player.BLACK){
+								int temp = ChessAI(tempBoard[row][col]);
+								if (temp > moveValue) {
+									moveValue = temp;
+									bestMove = tempMove;
+								}
+							}
+					}
+			return bestMove;
+		}
+		return null;
+	}
+
+	public int ChessAI(IChessPiece AIBoard) {
+
+		int moveValue = 0;
+		int tempValue = 0;
+
+		duplicateBoard(board);
+
+		for (int row = 0; row < BOARD_SIZE; row++) {
+			for (int col = 0; col < BOARD_SIZE; col++) {
+				if (tempBoard[row][col] == AIBoard)
+					for (int r = 0; r < BOARD_SIZE; r++) {
+						for (int c = 0; c < BOARD_SIZE; c++) {
+							if (r == tempMove.fromRow && c == tempMove.fromColumn)
+								break;
+							Move temp = new Move(row, col, r, c);
+							if (isValidMoveAI(temp)) {
+								if (pieceAt(r, c) != null && pieceAt(r, c).type().equals("Pawn") && 
+										pieceAt(row, col).type().equals("Pawn"))
+									moveValue = 15;
+								else if (pieceAt(r, c) != null && pieceAt(r, c).type().equals(pieceAt(row, col).type()))
+									moveValue = AIBoard.getPieceWorth() * board[r][c].getPieceWorth();
+								else if(pieceAt(r, c) != null)
+									moveValue = AIBoard.getPieceWorth() + board[r][c].getPieceWorth();
+								else
+									moveValue = AIBoard.getPieceWorth();
+
+								if (moveValue > tempValue) {
+									tempValue = moveValue;
+									tempMove = temp;
+								}
+							}
+						}
+					}
+			}
+		}
+		return tempValue;
+	}
+
+	public boolean isValidMoveAI(Move move) {
+
+		if ((pieceAt(move.fromRow, move.fromColumn) != null))
+			if (board[move.fromRow][move.fromColumn].isValidMove(move, board))
+				return true;
+
+		if (board[move.fromRow][move.fromColumn] == null)
+			return false;
+
+		return false;
+	}
+	
+	public boolean isValidMoveCM(Move move) {
+
+		if ((tempBoard[move.fromRow][move.fromColumn] != null))
+			if (tempBoard[move.fromRow][move.fromColumn].isValidMove(move, tempBoard))
+				return true;
+
+		if (tempBoard[move.fromRow][move.fromColumn] == null)
+			return false;
+
+		return false;
+	}
+
+
+}
