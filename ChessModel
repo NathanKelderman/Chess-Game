@@ -1,6 +1,7 @@
 package chess;
 
-import javax.swing.JOptionPane;
+import java.util.ArrayList;
+import java.util.Collections;
 
 public class ChessModel implements IChessModel {
 
@@ -8,21 +9,32 @@ public class ChessModel implements IChessModel {
 	private Player player;
 	private final int BOARD_SIZE = 8;
 	private boolean firstMove;
-
-	private int numMoves;
-	private int random;
-
+	private int numMoves;	
+	private ArrayList <Move> randomMoves;
 	private Move bestMove;
 	private Move tempMove;
+	private Move lastMove;
+	private IChessPiece[][] tempBoard;
 
-	//  declare other instance variables as needed
+	private boolean AIEnabled;
 
-	public ChessModel() {
+	private ArrayList <IChessPiece> whitePieces;
+	private ArrayList <IChessPiece> blackPieces;
 
+	public ChessModel() {		
+		reset();
+		setAIEnabled(true);
+	}	
+
+	public void reset() {
 		board = new IChessPiece[BOARD_SIZE][BOARD_SIZE];
-
 		numMoves = 0;
-		random = 0;
+		tempMove = null;
+
+		tempBoard = new IChessPiece[BOARD_SIZE][BOARD_SIZE];
+
+		whitePieces = new ArrayList<IChessPiece>();
+		blackPieces = new ArrayList<IChessPiece>();
 
 		player = Player.BLACK; // setting the AI to black
 		board[0][0] = new Rook(player);
@@ -50,7 +62,25 @@ public class ChessModel implements IChessModel {
 		for(int col = 0; col < 8; col++)
 			board[6][col] = new Pawn(player);
 
+		randomMoves = new ArrayList<Move>();
+		randomMoves.add(new Move(0, 1, 2, 0));
+		randomMoves.add(new Move(1, 1, 3, 1));
+		randomMoves.add(new Move(1, 3, 2, 3));
+		randomMoves.add(new Move(0, 6, 2, 5));
+		randomMoves.add(new Move(1, 2, 3, 2));
+		randomMoves.add(new Move(1, 4, 2, 4));
+		randomMoves.add(new Move(1, 6, 2, 6));
+		randomMoves.add(new Move(1, 7, 3, 7));
+		Collections.shuffle(randomMoves);
+
 		setFirstMove(true);
+		duplicateBoard(board);
+	}
+
+	public boolean isCellOccupied(IChessPiece temp){
+		if (temp != null)
+			return true;
+		return false;
 	}
 
 	public boolean isFirstMove() {
@@ -61,42 +91,300 @@ public class ChessModel implements IChessModel {
 		this.firstMove = firstMove;
 	}
 
-	public boolean isComplete() {
-		return false;
+	public boolean isAIEnabled() {
+		return AIEnabled;
+	}
+
+	public void setAIEnabled(boolean aIEnabled) {
+		AIEnabled = aIEnabled;
 	}
 
 	public boolean isValidMove(Move move) {
 
+		//duplicateBoard(board);
+
 		if (board[move.fromRow][move.fromColumn].player() != player) {
-			JOptionPane.showMessageDialog(null, "It is not your turn!");
-			return false;
+			throw new IllegalPlayer();
 		}
 
-		if ((pieceAt(move.fromRow, move.fromColumn) != null))
-			if (board[move.fromRow][move.fromColumn].isValidMove(move, board)) {
+		if (!castling(move)) {
 
-				player = player.next();
+			if (board[move.fromRow][move.fromColumn].isValidMove(move, board)) {
 				return true;
 			}
-
-		if (board[move.fromRow][move.fromColumn] == null) {
-			JOptionPane.showMessageDialog(null, "You must click a piece!");
-			return false;
+			else 
+				throw new InvalidMove();
 		}
-		else 
-			JOptionPane.showMessageDialog(null, "Not a valid move! (" + board[move.fromRow][move.fromColumn].type() + ")");
-		return false;
-		// complete this comes from panel to see if first clicked spot isnt null and and right color.
+		else
+			return false;
+	}
+
+	public void promotion(Move move){  			//take out used pieces
+		int y = 0;
+		int z = 0;
+		IChessPiece tempPiece = null;
+		if (tempBoard[move.fromRow][move.fromColumn].player() == Player.WHITE){
+			if (tempBoard[move.fromRow][move.fromColumn].type().equals("Pawn")) {
+				for (int x = 0; x < whitePieces.size(); x++){
+					if (whitePieces.get(x) != null && !whitePieces.get(x).type().equals("Pawn")){
+						if (whitePieces.get(x).getPieceWorth() >= y){
+							y = whitePieces.get(x).getPieceWorth();
+							tempPiece = whitePieces.get(x);
+							z = x;
+						}
+					}
+				}
+			}
+			board[move.toRow][move.toColumn] = tempPiece;
+			if (whitePieces.size() != 0)
+				whitePieces.remove(z);
+		}
+		else {
+			y = 0;
+			tempPiece = null;
+			if (tempBoard[move.fromRow][move.fromColumn].player() == Player.BLACK){
+				if (tempBoard[move.fromRow][move.fromColumn].type().equals("Pawn")){
+					for (int x = 0; x < blackPieces.size(); x++){
+						if (blackPieces.get(x) != null && !blackPieces.get(x).type().equals("Pawn") ){
+							if (blackPieces.get(x).getPieceWorth() >= y){
+								y = blackPieces.get(x).getPieceWorth();
+								tempPiece = blackPieces.get(x);
+								z = x;
+							}
+						}
+					}
+				}
+			}
+			board[move.toRow][move.toColumn] = tempPiece;
+			if (blackPieces.size() != 0)
+				blackPieces.remove(z);
+		}
 	}
 
 	public void move(Move move) {
-		board[move.toRow][move.toColumn] = board[move.fromRow][move.fromColumn];
-		board[move.fromRow][move.fromColumn] = null;
+
+		IChessPiece temp1 = board[move.toRow][move.toColumn];
+
+		if (temp1 != null){
+			if(temp1.player() == Player.WHITE) {
+				whitePieces.add(temp1);
+			}
+			else {
+				blackPieces.add(temp1);
+			}
+		}
+
+		if (pieceAt(move.fromRow, move.fromColumn) != null 
+				&& pieceAt(move.fromRow, move.fromColumn).type().equals("Pawn") 
+				&& ((move.toRow == 0 && board[move.fromRow][move.fromColumn].player() == Player.WHITE) || 
+						(move.toRow == 7 && board[move.fromRow][move.fromColumn].player() == Player.BLACK))
+				&& player == pieceAt(move.fromRow, move.fromColumn).player()) {
+
+
+			promotion(move);
+			board[move.fromRow][move.fromColumn] = null;
+
+			if (pieceAt(move.toRow, move.toColumn) == null || pieceAt(move.toRow, move.toColumn).type().equals("Pawn")) {
+
+				board[move.toRow][move.toColumn] = new Queen(player);
+				player = player.next();
+				throw new NoDeadPieces();
+			}
+			player = player.next();
+		}
+		else
+		{
+
+			IChessPiece temp = board[move.fromRow][move.fromColumn];
+			board[move.toRow][move.toColumn] = board[move.fromRow][move.fromColumn];
+			board[move.fromRow][move.fromColumn] = null;
+			boolean black = inCheck(Player.BLACK);
+			boolean white = inCheck(Player.WHITE);
+			boolean blackCM = isComplete(Player.BLACK);
+			boolean whiteCM = isComplete(Player.WHITE);
+
+			if (whiteCM || blackCM){
+				if (player == Player.WHITE && whiteCM) {
+					board[move.fromRow][move.fromColumn] = temp;
+					board[move.toRow][move.toColumn] = temp1;
+				}
+				if (player == Player.BLACK && blackCM) {
+					board[move.fromRow][move.fromColumn] = temp;
+					board[move.toRow][move.toColumn] = temp1;
+				} 
+				if (player == Player.WHITE && blackCM) {
+					board[move.fromRow][move.fromColumn] = null;
+					board[move.toRow][move.toColumn] = temp;
+					player = player.next(); 
+					throw new CheckMate();
+				}
+				if (player == Player.BLACK && whiteCM) {
+					board[move.fromRow][move.fromColumn] = null;
+					board[move.toRow][move.toColumn] = temp;
+					player = player.next();
+					throw new CheckMate();
+				}
+			}
+
+			else {
+
+				if (player == Player.WHITE && white) {
+					board[move.fromRow][move.fromColumn] = temp;
+					board[move.toRow][move.toColumn] = temp1;
+				}
+				else if (player == Player.BLACK && black) {
+					board[move.fromRow][move.fromColumn] = temp;
+					board[move.toRow][move.toColumn] = temp1;
+				} 
+				else {
+					if (player == Player.WHITE && black) {
+						board[move.fromRow][move.fromColumn] = null;
+						board[move.toRow][move.toColumn] = temp;
+						player = player.next(); 
+						throw new Check();
+					}
+					if (player == Player.BLACK && white) {
+						board[move.fromRow][move.fromColumn] = null;
+						board[move.toRow][move.toColumn] = temp;
+						player = player.next();
+						throw new Check();
+					}
+					if (!black && !white) {
+						board[move.toRow][move.toColumn] = temp;
+						player = player.next();
+					}
+				}
+			}
+		}
 	}
 
+
 	public boolean inCheck(Player p) {
+
+		duplicateBoard(board);
+
+		for (int row = 0; row < BOARD_SIZE; row++)
+			for (int col = 0; col < BOARD_SIZE; col++) {
+				if (tempBoard[row][col] != null) 
+					if (tempBoard[row][col].player() != p) {
+						for (int r = 0; r < BOARD_SIZE; r++)
+							for (int c = 0; c < BOARD_SIZE; c++) {
+								Move temp = new Move(row, col, r, c);
+								if (isValidMoveAI(temp) && board[r][c] != null)
+									if (tempBoard[r][c].player() == p && tempBoard[r][c].type().equals("King"))
+										return true;
+							}
+					}
+			}
 		return false;
 	}
+
+
+	public boolean inCheck1(Player p) {
+
+		for (int row = 0; row < BOARD_SIZE; row++)
+			for (int col = 0; col < BOARD_SIZE; col++) {
+				if (tempBoard[row][col] != null) 
+					if (tempBoard[row][col].player() != p) {
+						for (int r = 0; r < BOARD_SIZE; r++)
+							for (int c = 0; c < BOARD_SIZE; c++) {
+								Move temp = new Move(row, col, r, c);
+								if (isValidMoveAI(temp) && tempBoard[r][c] != null)
+									if (tempBoard[r][c].player() == p && tempBoard[r][c].type().equals("King"))
+										return true;
+							}
+					}
+			}
+		return false;
+	}
+
+	public boolean isComplete(Player p) {
+
+		duplicateBoard(board);
+
+		for (int row = 0; row < BOARD_SIZE; row++)
+			for (int col = 0; col < BOARD_SIZE; col++) {
+				if (tempBoard[row][col] != null) 
+					if (tempBoard[row][col].player() == p) {
+						for (int r = 0; r < BOARD_SIZE; r++)
+							for (int c = 0; c < BOARD_SIZE; c++) {
+								Move temp = new Move(row, col, r, c);
+								IChessPiece tempPiece = tempBoard[row][col];
+								IChessPiece tempPiece1 = null;
+								if ( tempBoard[r][c] != null)
+									tempPiece1 = tempBoard[r][c];
+								if (isValidMoveAI(temp) ) {
+									tempBoard[row][col] = null;
+									tempBoard[r][c] = tempPiece;
+
+									if (!inCheck1(p)){
+										tempBoard[row][col] = tempPiece;
+										tempBoard[r][c] = tempPiece1;
+										return false;
+									}
+								}
+								tempBoard[row][col] = tempPiece;
+								tempBoard[r][c] = tempPiece1;
+							}
+
+					}
+			}
+		return true;
+	}
+
+	public void duplicateBoard(IChessPiece[][] newBoard) {
+
+		tempBoard = new IChessPiece[BOARD_SIZE][BOARD_SIZE];
+
+		for (int row = 0; row < BOARD_SIZE; row++)
+			for (int col = 0; col < BOARD_SIZE; col++) {
+				if (board[row][col] != null ){
+					if (newBoard[row][col].type().equals("Pawn") && newBoard[row][col].player() == Player.WHITE){
+						tempBoard[row][col] = new Pawn(Player.WHITE);
+					}
+					else if (newBoard[row][col].type().equals("Pawn"))
+						tempBoard[row][col] = new Pawn(Player.BLACK);
+
+					if (newBoard[row][col].type().equals("Rook") && newBoard[row][col].player() == Player.WHITE) {
+						tempBoard[row][col] = new Rook(Player.WHITE);
+						if (!((Rook)board[row][col]).isCastlingValid())
+							((Rook)tempBoard[row][col]).setCastlingValid(false);
+					}
+					else if (newBoard[row][col].type().equals("Rook")) {
+						tempBoard[row][col] = new Rook(Player.BLACK);
+						if (!((Rook)board[row][col]).isCastlingValid())
+							((Rook)tempBoard[row][col]).setCastlingValid(false);
+					}
+
+					if (newBoard[row][col].type().equals("Bishop") && newBoard[row][col].player() == Player.WHITE)
+						tempBoard[row][col] = new Bishop(Player.WHITE);
+					else if (newBoard[row][col].type().equals("Bishop"))
+						tempBoard[row][col] = new Bishop(Player.BLACK);
+
+					if (newBoard[row][col].type().equals("Knight") && newBoard[row][col].player() == Player.WHITE)
+						tempBoard[row][col] = new Knight(Player.WHITE);
+					else if (newBoard[row][col].type().equals("Knight"))
+						tempBoard[row][col] = new Knight(Player.BLACK);
+
+					if (newBoard[row][col].type().equals("King") && newBoard[row][col].player() == Player.WHITE) {
+						tempBoard[row][col] = new King(Player.WHITE);
+						if (!((King)board[row][col]).isCastlingValid())
+							((King)tempBoard[row][col]).setCastlingValid(false);
+					}	
+					else if (newBoard[row][col].type().equals("King")) {
+						tempBoard[row][col] = new King(Player.BLACK);
+						if (!((King)board[row][col]).isCastlingValid())
+							((King)tempBoard[row][col]).setCastlingValid(false);
+					}
+
+					if (newBoard[row][col].type().equals("Queen") && newBoard[row][col].player() == Player.WHITE)
+						tempBoard[row][col] = new Queen(Player.WHITE);
+					else if (newBoard[row][col].type().equals("Queen"))
+						tempBoard[row][col] = new Queen(Player.BLACK);
+				}
+			}
+	}
+
 
 	public Player currentPlayer() {
 		return player;
@@ -115,60 +403,105 @@ public class ChessModel implements IChessModel {
 	}
 
 	public Move ChessAIMove() {
+		if (Player.BLACK == player) {
+
+			duplicateBoard(board);
+
+			int moveValue = 0;
+			//			moveCount = 0;
+			//bestMove = null;
 
 
+			if (inCheck(Player.BLACK)){
+				//System.out.println("YAY");
+				for (int row = 0; row < BOARD_SIZE; row++)
+					for (int col = 0; col < BOARD_SIZE; col++) {
+						//System.out.println("black in check");
+						if (tempBoard[row][col] != null) 
+							if (tempBoard[row][col].player() == Player.BLACK) {
+								for (int r = 0; r < BOARD_SIZE; r++)
+									for (int c = 0; c < BOARD_SIZE; c++) {
+										Move temp = new Move(row, col, r, c);
+										IChessPiece tempPiece = tempBoard[row][col];
+										IChessPiece tempPiece1 = null;
+										if ( tempBoard[r][c] != null)
+											tempPiece1 = tempBoard[r][c];
+										if (isValidMoveAI(temp) ) {
+											tempBoard[r][c] = tempPiece;
+											tempBoard[row][col] = null;
 
-		int moveValue = 0;
-		bestMove = null;
+											if (!inCheck1(Player.BLACK)){
+												tempBoard[row][col] = tempPiece;
+												tempBoard[r][c] = tempPiece1;
+												//													tempMove = temp;// changed to tempMove instead of bestMove
+												return temp;
+											}
+										}
+										tempBoard[row][col] = tempPiece;
+										tempBoard[r][c] = tempPiece1;
+									}
 
-		if (numMoves < 4) {
-			switch (random) {
-			case 0: bestMove = new Move(0, 1, 2, 0);
-			random++;
-			break;
-			case 1: bestMove = new Move(1, 1, 3, 1);
-			random++;
-			break;
-			case 2: bestMove = new Move(1, 3, 2, 3);
-			random++;
-			break;
-			case 3: bestMove = new Move(0, 6, 2, 5);
-			random++;
-			break;	
+							}
+					}
 			}
 
-		}
-		else
-			for (int row = 0; row < BOARD_SIZE; row++)
-				for (int col = 0; col < BOARD_SIZE; col++) {
-					int temp = ChessAI(board[row][col]);
-					if (temp > moveValue && board[row][col].player() == player.BLACK) {
-						moveValue = temp;
-						bestMove = tempMove;
-					}
+			else {
+
+				if (numMoves < 4) {
+					for (int i = numMoves; i < randomMoves.size(); i++)
+						if(isValidMoveAI(randomMoves.get(i))) {
+							bestMove = randomMoves.get(i);
+							lastMove = bestMove;
+							numMoves++;
+							return bestMove;
+						}			
 				}
-		player = player.next();
-		numMoves++;
-		return bestMove;
+
+
+				else {
+					for (int row = 0; row < BOARD_SIZE; row++)
+						for (int col = 0; col < BOARD_SIZE; col++) { 
+							if (tempBoard[row][col] != null)  
+								if (tempBoard[row][col].player() == Player.BLACK){  
+									int temp = ChessAI(tempBoard[row][col]);          //send to ChessAI
+									if (temp >= moveValue) {
+										moveValue = temp;
+										bestMove = tempMove;
+									}
+								}
+						}
+					lastMove = bestMove;
+					return bestMove;
+				}
+			}
+		}
+		return null;
 	}
 
 	public int ChessAI(IChessPiece AIBoard) {
 
-		int moveValue = -1;
-		int tempValue = -1;
-		tempMove = null;
+		int moveValue = 0;
+		int tempValue = 0;
 
 		for (int row = 0; row < BOARD_SIZE; row++) {
 			for (int col = 0; col < BOARD_SIZE; col++) {
-				if (board[row][col] == AIBoard)
+				if (tempBoard[row][col] == AIBoard)
 					for (int r = 0; r < BOARD_SIZE; r++) {
 						for (int c = 0; c < BOARD_SIZE; c++) {
+							if (r == lastMove.fromRow && c == lastMove.fromColumn) 		//use lastMove
+								break;
 							Move temp = new Move(row, col, r, c);
 							if (isValidMoveAI(temp)) {
-								if (pieceAt(r, c) != null)
-									moveValue = AIBoard.getPieceWorth() + board[r][c].getPieceWorth();
+
+								if (tempBoard[r][c] != null && tempBoard[r][c].type().equals("Pawn") && 
+										tempBoard[row][col].type().equals("Pawn")) //if pawn to pawn make move 7
+									moveValue = 7;
+								else if (tempBoard[r][c] != null && tempBoard[r][c].type().equals(tempBoard[row][col].type()))
+									moveValue = AIBoard.getPieceWorth() * 2; //if same piece *2
+								else if(tempBoard[r][c] != null)
+									moveValue = AIBoard.getPieceWorth() + tempBoard[r][c].getPieceWorth(); // random to random add them
 								else
-									moveValue = AIBoard.getPieceWorth();
+									moveValue = 1; //empty 'to' cell just make it 1
 
 								if (moveValue > tempValue) {
 									tempValue = moveValue;
@@ -182,17 +515,214 @@ public class ChessModel implements IChessModel {
 		return tempValue;
 	}
 
-	public boolean isValidMoveAI(Move move) {
+	public boolean castling(Move move) {
 
-		if ((pieceAt(move.fromRow, move.fromColumn) != null))
-			if (board[move.fromRow][move.fromColumn].isValidMove(move, board))
-				return true;
+		duplicateBoard(board);
 
-		if (board[move.fromRow][move.fromColumn] == null)
-			return false;
+		if (!inCheck1(player)) {
+			if(player == Player.WHITE) {
+				if(tempBoard[move.fromRow][move.fromColumn].type().equals("King"))
+					if (((King)tempBoard[move.fromRow][move.fromColumn]).isCastlingValid())
+						if (move.toColumn == 2 && tempBoard[7][0] instanceof Rook) {
+							if (((Rook)tempBoard[7][0]).isCastlingValid())
+								if(tempBoard[7][1] == null && tempBoard[7][2] == null && tempBoard[7][3] == null) {
+
+									Move temp = new Move(7, 4, 7, 3);
+									if (isValidMoveAI(temp)) {
+
+										tempBoard[7][3] = tempBoard[7][4];
+										tempBoard[7][4] = null;
+
+										if (!inCheck1(Player.WHITE)) {
+
+											Move temp1 = new Move(7, 3, 7, 2);
+											if (isValidMoveAI(temp1)){
+
+												tempBoard[7][2] = tempBoard[7][3];
+												tempBoard[7][3] = null;
+
+												if (!inCheck1(Player.WHITE)) {
+
+													board[7][3] = tempBoard[7][0];
+													board[7][2] = tempBoard[7][2];
+													board[7][0] = null; //setting rook to null
+													board[7][4] = null; //setting king to null
+													player = player.next();
+													return true;
+												}
+											}
+										}
+
+										tempBoard[7][4] = tempBoard[7][2];
+										tempBoard[7][2] = null;
+										tempBoard[7][0] = tempBoard[7][3];
+										tempBoard[7][3] = null;
+									}
+								}
+						}
+						else 
+							if (move.toColumn == 6 && tempBoard[7][7] instanceof Rook) {
+								if (((Rook)tempBoard[7][7]).isCastlingValid())
+									if(tempBoard[7][5] == null && tempBoard[7][6] == null) {
+
+										Move temp = new Move(7, 4, 7, 5);
+										if (isValidMoveAI(temp)) {
+
+											tempBoard[7][5] = tempBoard[7][4];
+											tempBoard[7][4] = null;
+
+											if (!inCheck1(Player.WHITE)) {
+
+												Move temp1 = new Move(7, 5, 7, 6);
+												if (isValidMoveAI(temp1) ) {
+
+													tempBoard[7][6] = tempBoard[7][5];
+													tempBoard[7][5] = null;
+
+													if (!inCheck1(Player.WHITE)) {
+
+														board[7][5] = tempBoard[7][7];
+														board[7][6] = tempBoard[7][6];
+														board[7][7] = null; //setting rook to null
+														board[7][4] = null; //setting king to null
+														player = player.next();
+														return true;
+													}
+
+												}
+											}
+
+											tempBoard[7][4] = tempBoard[7][6];
+											tempBoard[7][6] = null;
+											tempBoard[7][7] = board[7][5];
+											tempBoard[7][5] = null;
+										}
+									}
+							}
+			}
+			else 
+				if(tempBoard[move.fromRow][move.fromColumn].type().equals("King"))
+					if (((King)tempBoard[move.fromRow][move.fromColumn]).isCastlingValid())
+						if (move.toColumn == 2 && tempBoard[0][0] instanceof Rook) {
+							if (((Rook)tempBoard[0][0]).isCastlingValid())
+								if(tempBoard[0][1] == null && tempBoard[0][2] == null && tempBoard[0][3] == null) {
+
+									Move temp = new Move(0, 4, 0, 3);
+									isValidMoveAI(temp);
+
+									tempBoard[0][3] = tempBoard[0][4];
+									tempBoard[0][4] = null;
+
+									if (!inCheck1(Player.BLACK)) {
+
+										Move temp1 = new Move(0, 3, 0, 2);
+										isValidMoveAI(temp1);
+
+										tempBoard[0][2] = tempBoard[0][3];
+										tempBoard[0][3] = null;
+
+										if (!inCheck1(Player.BLACK)) {
+
+											board[0][3] = tempBoard[0][0];
+											board[0][2] = tempBoard[0][2];
+											board[0][0] = null; //setting rook to null
+											board[0][4] = null; //setting king to null
+											player = player.next();
+											return true;
+										}
+
+									}
+								}
+							tempBoard[0][4] = tempBoard[0][2];
+							tempBoard[0][2] = null;
+							tempBoard[0][0] = board[0][3];
+							tempBoard[0][3] = null;
+						}
+						else 
+							if (move.toColumn == 6 && tempBoard[0][7] instanceof Rook) {
+								if (((Rook)tempBoard[0][7]).isCastlingValid())
+									if(tempBoard[0][5] == null && tempBoard[0][6] == null) {
+
+										Move temp = new Move(0, 4, 0, 5);
+										isValidMoveAI(temp);
+
+										tempBoard[0][5] = tempBoard[0][4];
+										tempBoard[0][4] = null;
+
+										if (!inCheck1(Player.BLACK)) {
+
+											Move temp1 = new Move(0, 5, 0, 6);
+											isValidMoveAI(temp1);
+
+											tempBoard[0][6] = tempBoard[0][5];
+											tempBoard[0][5] = null;
+
+											if (!inCheck1(Player.BLACK)) {
+
+												board[0][5] = tempBoard[0][7];
+												board[0][6] = tempBoard[0][6];
+												board[0][7] = null; //setting rook to null
+												board[0][4] = null; //setting king to null
+												player = player.next();
+												return true;
+											}
+										}
+									}
+								tempBoard[0][4] = tempBoard[0][6];
+								tempBoard[0][6] = null;
+								tempBoard[0][7] = board[0][5];
+								tempBoard[0][5] = null;
+							}
+		}
 
 		return false;
-		// complete this comes from panel to see if first clicked spot isnt null and and right color.
+	}
+
+	public boolean isValidMoveAI(Move move) {
+
+		if ((tempBoard[move.fromRow][move.fromColumn] != null))
+			if (tempBoard[move.fromRow][move.fromColumn].isValidMove(move, tempBoard))
+				return true;
+
+		return false;
+	}
+
+	public boolean highlight(Move move) {
+
+		duplicateBoard(board);
+
+		if ((tempBoard[move.fromRow][move.fromColumn] != null))
+			if (tempBoard[move.fromRow][move.fromColumn].isValidMove(move, tempBoard))
+				return true;
+
+		return false;
+	}
+
+	public Move getOutOfCheck() {
+
+		for (int row = 0; row < BOARD_SIZE; row++)
+			for (int col = 0; col < BOARD_SIZE; col++) {
+				if (tempBoard[row][col] != null) 
+					if (tempBoard[row][col].player() != Player.BLACK) {
+						for (int r = 0; r < BOARD_SIZE; r++)
+							for (int c = 0; c < BOARD_SIZE; c++) {
+								Move temp = new Move(row, col, r, c);
+								if (isValidMoveAI(temp)) {
+									tempBoard[r][c] = tempBoard[row][col];
+									IChessPiece temp1 = tempBoard[row][col];
+									tempBoard[row][col] = null;
+
+									if (!inCheck(Player.BLACK)) {
+										tempMove = temp;
+										tempBoard[r][c] = null;
+										tempBoard[row][col] = temp1;
+									}
+								}
+
+							}
+					}
+			}
+		return tempMove;
 	}
 
 }
