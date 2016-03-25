@@ -1,0 +1,408 @@
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.border.Border;
+import javax.swing.border.LineBorder;
+
+public class ChessPanel extends JPanel {
+
+	private static final long serialVersionUID = 7659163831895615217L;
+
+	private JButton[][] board;
+	private Move move;
+	private ChessModel model;
+	private JPanel center;
+	private final int BOARD_SIZE = 8;
+
+	private int rowMove;
+	private int colMove;
+
+	private ImageIcon check = new ImageIcon("C:\\Users\\Nathan\\Chess"
+			+ "\\src\\check.png");
+	private ImageIcon checkMate = new ImageIcon("C:\\Users\\Nathan\\Chess"
+			+ "\\src\\checkMate.png");
+	private ImageIcon warningIcon = new ImageIcon("C:\\Users\\Nathan\\Chess"
+			+ "\\src\\warningIcon.png");
+	private ImageIcon rook = new ImageIcon("C:\\Users\\Nathan\\Chess"
+			+ "\\src\\rook.png");
+	private ImageIcon pawn = new ImageIcon("C:\\Users\\Nathan\\Chess"
+			+ "\\src\\pawn.png");
+	private ImageIcon bishop = new ImageIcon("C:\\Users\\Nathan\\Chess"
+			+ "\\src\\bishop.png");
+	private ImageIcon knight = new ImageIcon("C:\\Users\\Nathan\\Chess"
+			+ "\\src\\knight.png");
+	private ImageIcon queen = new ImageIcon("C:\\Users\\Nathan\\Chess"
+			+ "\\src\\queen.png");
+	private ImageIcon king = new ImageIcon("C:\\Users\\Nathan\\Chess"
+			+ "\\src\\king.png");
+	private ImageIcon rookB = new ImageIcon("C:\\Users\\Nathan\\Chess"
+			+ "\\src\\rookB.png");
+	private ImageIcon pawnB = new ImageIcon("C:\\Users\\Nathan\\Chess"
+			+ "\\src\\pawnB.png");
+	private ImageIcon bishopB = new ImageIcon("C:\\Users\\Nathan\\Chess"
+			+ "\\src\\bishopB.png");
+	private ImageIcon knightB = new ImageIcon("C:\\Users\\Nathan\\Chess"
+			+ "\\src\\knightB.png");
+	private ImageIcon queenB = new ImageIcon("C:\\Users\\Nathan\\Chess"
+			+ "\\src\\queenB.png");
+	private ImageIcon kingB = new ImageIcon("C:\\Users\\Nathan\\Chess"
+			+ "\\src\\kingB.png");
+
+
+	public ChessPanel() {
+
+		ButtonListener listener = new ButtonListener();
+		center = new JPanel();
+		center.setLayout(new GridLayout(BOARD_SIZE, BOARD_SIZE));
+		board = new JButton[BOARD_SIZE][BOARD_SIZE];
+
+		model = new ChessModel();
+
+		boolean white = true;
+
+		for (int row = 0; row < model.numRows(); row++) {
+			white = !white;
+			for (int col = 0; col < model.numColumns(); col++) {
+				board[row][col] = new JButton("");
+				board[row][col].setPreferredSize(new Dimension(90, 90));
+				board[row][col].setBorder(null);
+				board[row][col].addActionListener(listener);
+				center.add(board[row][col]);
+				if (white)
+					board[row][col].setBackground(Color.WHITE);
+				else
+					board[row][col].setBackground(Color.DARK_GRAY);
+				white = !white;
+			}
+		}
+
+		add(center, BorderLayout.CENTER);
+		displayBoard();
+	}
+
+	// method that updates the board
+	private void displayBoard() {
+		for (int row = 0; row < model.numRows(); row++) {
+			for (int col = 0; col < model.numColumns(); col++) {
+				if (model.pieceAt(row, col) != null){
+					if (model.pieceAt(row, col).player() == Player.WHITE ){
+						if (model.pieceAt(row, col).type().equals("Pawn"))
+							board[row][col].setIcon(pawn);
+						if (model.pieceAt(row, col).type().equals("Rook"))
+							board[row][col].setIcon(rook);
+						if (model.pieceAt(row, col).type().equals("Knight"))
+							board[row][col].setIcon(knight);
+						if (model.pieceAt(row, col).type().equals("Bishop"))
+							board[row][col].setIcon(bishop);
+						if (model.pieceAt(row, col).type().equals("King"))
+							board[row][col].setIcon(king);
+						if (model.pieceAt(row, col).type().equals("Queen"))
+							board[row][col].setIcon(queen);
+					}
+					else if (model.pieceAt(row, col).player() == Player.BLACK ){
+						if (model.pieceAt(row, col).type().equals("Pawn"))
+							board[row][col].setIcon(pawnB);
+						if (model.pieceAt(row, col).type().equals("Rook"))
+							board[row][col].setIcon(rookB);
+						if (model.pieceAt(row, col).type().equals("Knight"))
+							board[row][col].setIcon(knightB);
+						if (model.pieceAt(row, col).type().equals("Bishop"))
+							board[row][col].setIcon(bishopB);
+						if (model.pieceAt(row, col).type().equals("King"))
+							board[row][col].setIcon(kingB);
+						if (model.pieceAt(row, col).type().equals("Queen"))
+							board[row][col].setIcon(queenB);
+					}
+				}
+				else
+					board[row][col].setIcon(null);
+
+			}
+		}
+	}
+
+//	public void highlight(boolean isValid) {
+//		
+//	}
+	
+	
+	public void highlight(boolean isValid) {
+		Border highlight = new LineBorder(Color.GREEN, 3);
+		Border highlightRed = new LineBorder(Color.RED, 3);
+
+		for (int row = 0; row < BOARD_SIZE; row++)
+			for (int col = 0; col < BOARD_SIZE; col++) {
+				Move move = new Move(rowMove, colMove, row, col);
+				if (isValid && model.isFirstClick()) {
+					if (model.highlight(move)) {
+						board[row][col].setBorder(highlight);
+						if (model.highlightRed(move)) {
+							board[row][col].setBorder(highlightRed);
+						}
+					}
+				}
+				else 
+					board[row][col].setBorder(null);
+			}
+	}
+
+	public void AIMove() {
+		try {
+			move = model.chessAIMove();
+			if (move!= null) {
+				model.move(move);
+			}
+			displayBoard();
+		}
+		catch (Check e){
+			if (model.currentPlayer() == Player.WHITE) {
+				displayBoard();
+				JOptionPane.showMessageDialog(null, "White in check!", "Check", JOptionPane.INFORMATION_MESSAGE, check);
+
+			}
+			else {
+				displayBoard();
+				JOptionPane.showMessageDialog(null, "Black in check!", "Check", JOptionPane.INFORMATION_MESSAGE, check);
+			}
+		}
+		catch(CheckMate e) {
+			if (model.currentPlayer() == Player.WHITE) {
+
+				displayBoard();
+				int reply = JOptionPane.showConfirmDialog(null, "White is in checkmate!\nWould you like to play again?", "CheckMate", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, checkMate);
+
+				if (reply == JOptionPane.YES_OPTION) {
+					reset();
+				}
+			}
+		}
+		catch (NoDeadPieces e) {
+			JOptionPane.showMessageDialog(null, "No available pieces!\nPawn changed to queen!", "Promotion", JOptionPane.INFORMATION_MESSAGE, warningIcon);
+		}
+		
+		catch(NoDeadPiecesInCheck e) {
+			JOptionPane.showMessageDialog(null, "No available pieces!\nPawn changed to queen!", "Promotion", JOptionPane.INFORMATION_MESSAGE, warningIcon);
+			
+			if (model.currentPlayer() == Player.WHITE) {
+				displayBoard();
+				JOptionPane.showMessageDialog(null, "White in check!", "Check", JOptionPane.INFORMATION_MESSAGE, check);
+
+			}
+			else {
+				displayBoard();
+				JOptionPane.showMessageDialog(null, "Black in check!", "Check", JOptionPane.INFORMATION_MESSAGE, check);
+			}
+		}
+		
+		catch(NoDeadPiecesInCheckMate e) {
+			JOptionPane.showMessageDialog(null, "No available pieces!\nPawn changed to queen!", "Promotion", JOptionPane.INFORMATION_MESSAGE, warningIcon);
+			
+			if (model.currentPlayer() == Player.WHITE) {
+
+				displayBoard();
+				int reply = JOptionPane.showConfirmDialog(null, "White is in checkmate!\nWould you like to play again?", "CheckMate", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, checkMate);
+
+				if (reply == JOptionPane.YES_OPTION) {
+					reset();
+				}
+			}
+			else {
+				displayBoard();
+				int reply = JOptionPane.showConfirmDialog(null, "Black is in checkmate!\nWould you like to play again?", "CheckMate", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, checkMate);
+
+				if (reply == JOptionPane.YES_OPTION) {
+					reset();
+				}
+
+			}
+		}
+
+		finally {
+			displayBoard();
+		}
+	}
+
+	public void reset() {
+		model.reset();
+		highlight(false);
+		displayBoard();
+	}
+
+	public void setAI(boolean setAI) {
+		model.setAIEnabled(setAI);
+	}
+
+	// inner class that represents action listener for buttons
+	private class ButtonListener implements ActionListener {
+
+//		private Move move;
+
+		public void actionPerformed(ActionEvent event) {			
+			for (int row = 0; row < model.numRows(); row++)
+				for (int col = 0; col < model.numColumns(); col++)
+					if (board[row][col] == event.getSource()){
+						if (model.isCellOccupied(model.pieceAt(row, col)) || model.isFirstClick() == false) {
+
+
+							if (model.isFirstClick()) {
+								rowMove = row;
+								colMove = col;
+								highlight(true);
+								model.setFirstClick(false);
+
+							}
+							else if (!model.isFirstClick()) {
+								move = new Move(rowMove, colMove, row, col);
+								highlight(false);
+
+								try {
+									if (model.isValidMove(move)) {
+										model.move(move);
+										displayBoard();
+
+									}
+								}
+
+								catch (IllegalPlayer e) {
+									if (model.currentPlayer() == Player.WHITE) 
+										JOptionPane.showMessageDialog(null, "It is not your turn!", "Black", JOptionPane.INFORMATION_MESSAGE, warningIcon);
+									else 
+										JOptionPane.showMessageDialog(null, "It is not your turn!", "White", JOptionPane.INFORMATION_MESSAGE, warningIcon);
+									model.setFirstClick(true);
+									displayBoard();
+									break;
+								}
+
+								catch (InvalidMove e) {
+									if (model.currentPlayer() == Player.WHITE) {
+										if (model.pieceAt(move.fromRow, move.fromColumn).type().equals("Pawn"))
+											JOptionPane.showMessageDialog(null, "Not a valid move!", model.pieceAt(move.fromRow, move.fromColumn).type(), JOptionPane.INFORMATION_MESSAGE, pawn);
+										if (model.pieceAt(move.fromRow, move.fromColumn).type().equals("Rook"))
+											JOptionPane.showMessageDialog(null, "Not a valid move!", model.pieceAt(move.fromRow, move.fromColumn).type(), JOptionPane.INFORMATION_MESSAGE, rook);
+										if (model.pieceAt(move.fromRow, move.fromColumn).type().equals("Knight"))
+											JOptionPane.showMessageDialog(null, "Not a valid move!", model.pieceAt(move.fromRow, move.fromColumn).type(), JOptionPane.INFORMATION_MESSAGE, knight);
+										if (model.pieceAt(move.fromRow, move.fromColumn).type().equals("Bishop"))
+											JOptionPane.showMessageDialog(null, "Not a valid move!", model.pieceAt(move.fromRow, move.fromColumn).type(), JOptionPane.INFORMATION_MESSAGE, bishop);
+										if (model.pieceAt(move.fromRow, move.fromColumn).type().equals("Queen"))
+											JOptionPane.showMessageDialog(null, "Not a valid move!", model.pieceAt(move.fromRow, move.fromColumn).type(), JOptionPane.INFORMATION_MESSAGE, queen);
+										if (model.pieceAt(move.fromRow, move.fromColumn).type().equals("King"))
+											JOptionPane.showMessageDialog(null, "Not a valid move!", model.pieceAt(move.fromRow, move.fromColumn).type(), JOptionPane.INFORMATION_MESSAGE, king);
+										model.setFirstClick(true);
+										displayBoard();
+										break;
+									}
+									else {
+										if (model.pieceAt(move.fromRow, move.fromColumn).type().equals("Pawn"))
+											JOptionPane.showMessageDialog(null, "Not a valid move!", model.pieceAt(move.fromRow, move.fromColumn).type(), JOptionPane.INFORMATION_MESSAGE, pawnB);
+										if (model.pieceAt(move.fromRow, move.fromColumn).type().equals("Rook"))
+											JOptionPane.showMessageDialog(null, "Not a valid move!", model.pieceAt(move.fromRow, move.fromColumn).type(), JOptionPane.INFORMATION_MESSAGE, rookB);
+										if (model.pieceAt(move.fromRow, move.fromColumn).type().equals("Knight"))
+											JOptionPane.showMessageDialog(null, "Not a valid move!", model.pieceAt(move.fromRow, move.fromColumn).type(), JOptionPane.INFORMATION_MESSAGE, knightB);
+										if (model.pieceAt(move.fromRow, move.fromColumn).type().equals("Bishop"))
+											JOptionPane.showMessageDialog(null, "Not a valid move!", model.pieceAt(move.fromRow, move.fromColumn).type(), JOptionPane.INFORMATION_MESSAGE, bishopB);
+										if (model.pieceAt(move.fromRow, move.fromColumn).type().equals("Queen"))
+											JOptionPane.showMessageDialog(null, "Not a valid move!", model.pieceAt(move.fromRow, move.fromColumn).type(), JOptionPane.INFORMATION_MESSAGE, queenB);
+										if (model.pieceAt(move.fromRow, move.fromColumn).type().equals("King"))
+											JOptionPane.showMessageDialog(null, "Not a valid move!", model.pieceAt(move.fromRow, move.fromColumn).type(), JOptionPane.INFORMATION_MESSAGE, kingB);
+										model.setFirstClick(true);
+										displayBoard();
+										break;
+									}
+								}
+
+								catch (Check e) {
+									if (model.currentPlayer() == Player.WHITE) {
+										displayBoard();
+										JOptionPane.showMessageDialog(null, "White in check!", "Check", JOptionPane.INFORMATION_MESSAGE, check);
+
+									}
+									else {
+										displayBoard();
+										JOptionPane.showMessageDialog(null, "Black in check!", "Check", JOptionPane.INFORMATION_MESSAGE, check);
+									}
+								}
+
+								catch(NoDeadPiecesInCheck e) {
+									JOptionPane.showMessageDialog(null, "No available pieces!\nPawn changed to queen!", "Promotion", JOptionPane.INFORMATION_MESSAGE, warningIcon);
+									
+									if (model.currentPlayer() == Player.WHITE) {
+										displayBoard();
+										JOptionPane.showMessageDialog(null, "White in check!", "Check", JOptionPane.INFORMATION_MESSAGE, check);
+
+									}
+									else {
+										displayBoard();
+										JOptionPane.showMessageDialog(null, "Black in check!", "Check", JOptionPane.INFORMATION_MESSAGE, check);
+									}
+								}
+								
+								catch(NoDeadPiecesInCheckMate e) {
+									JOptionPane.showMessageDialog(null, "No available pieces!\nPawn changed to queen!", "Promotion", JOptionPane.INFORMATION_MESSAGE, warningIcon);
+									
+									if (model.currentPlayer() == Player.WHITE) {
+
+										displayBoard();
+										int reply = JOptionPane.showConfirmDialog(null, "White is in checkmate!\nWould you like to play again?", "CheckMate", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, checkMate);
+
+										if (reply == JOptionPane.YES_OPTION) {
+											reset();
+										}
+									}
+									else {
+										displayBoard();
+										int reply = JOptionPane.showConfirmDialog(null, "Black is in checkmate!\nWould you like to play again?", "CheckMate", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, checkMate);
+
+										if (reply == JOptionPane.YES_OPTION) {
+											reset();
+										}
+
+									}
+								}
+								
+								
+								catch(CheckMate e) {
+									if (model.currentPlayer() == Player.WHITE) {
+
+										displayBoard();
+										int reply = JOptionPane.showConfirmDialog(null, "White is in checkmate!\nWould you like to play again?", "CheckMate", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, checkMate);
+
+										if (reply == JOptionPane.YES_OPTION) {
+											reset();
+										}
+
+									}
+									else {
+										displayBoard();
+										int reply = JOptionPane.showConfirmDialog(null, "Black is in checkmate!\nWould you like to play again?", "CheckMate", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, checkMate);
+
+										if (reply == JOptionPane.YES_OPTION) {
+											reset();
+										}
+
+									}
+								}
+
+								catch (NoDeadPieces e) {
+									JOptionPane.showMessageDialog(null, "No available pieces!\nPawn changed to queen!", "Promotion", JOptionPane.INFORMATION_MESSAGE, warningIcon);
+								}
+
+								finally {
+									if (model.isAIEnabled())
+										AIMove();
+									model.setFirstClick(true);
+									displayBoard();
+								}
+							}
+						}
+					}
+		}
+	}
+}
