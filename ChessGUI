@@ -1,0 +1,73 @@
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+
+public class ChessGUI {
+	
+	private static JMenuBar menuBar;
+	private static JMenu menu;
+	private static JMenu menuNewGame;
+	private static JMenuItem menuPlayer;
+	private static JMenuItem menuAI;
+	private static JMenuItem menuExit;
+
+	public static void main(String[] args) {
+		JFrame frame = new JFrame("Chess Game");
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+		ChessPanel panel = new ChessPanel();
+		frame.getContentPane().add(panel);
+		
+		frame.setSize(740, 790);
+		frame.setLocationRelativeTo(null);
+
+		class MenuActionListener implements ActionListener {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (e.getSource() == menuPlayer) {
+					panel.reset();
+					panel.setAI(false);
+				}
+				
+				if (e.getSource() == menuAI) {
+					panel.reset(); 
+					panel.setAI(true);
+				}
+				
+				if (e.getSource() == menuExit)
+					System.exit(0);
+			}
+		}
+
+		menuBar = new JMenuBar();
+		menu = new JMenu("Options");
+		menuBar.add(menu);
+		menuNewGame = new JMenu("New Game");
+		menuNewGame.addActionListener(new MenuActionListener());
+		menu.add(menuNewGame);
+		
+		menuPlayer = new JMenuItem("Player mode");
+		menuPlayer.addActionListener(new MenuActionListener());
+		menuNewGame.add(menuPlayer);
+		
+		
+		menuAI = new JMenuItem("AI mode");
+		menuAI.addActionListener(new MenuActionListener());
+		menuNewGame.add(menuAI);
+		
+		
+		menuExit= new JMenuItem("Exit");
+		menuExit.addActionListener(new MenuActionListener());
+		menu.add(menuExit);
+		frame.setJMenuBar(menuBar);
+		
+		frame.setVisible(true);
+	}
+}
