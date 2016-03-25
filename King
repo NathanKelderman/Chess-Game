@@ -1,0 +1,98 @@
+package chess;
+
+/*****************************************************************************
+ * This class holds the properties for the King chess piece and it also 
+ * includes other information necessary to use the King.
+ * 
+ * @author Matthew Shampine and Nathan Kelderman
+ ****************************************************************************/
+public class King extends ChessPiece {
+	
+	/** This is a boolean to make sure the king hasn't moved and that 
+	 * castling is valid */
+	private boolean isCastlingValid;
+	
+	/** This is the value of the King used for the AI to make decisions about
+	 * the game */
+	private final int PIECE_WORTH = 0;
+
+	/*************************************************************************
+	 * Default constructor for the King class which sets up a king for each
+	 * player. This also sets castling true because at the start of the game 
+	 * the king has not moved.
+	 * 
+	 * @param player this is the current player that the piece is assigned to
+	 ************************************************************************/
+	protected King(Player player) {
+		super(player);
+		isCastlingValid = true;
+	}
+	
+	/*************************************************************************
+	 * Getter method returns whether or not castling is a valid move for the 
+	 * king.
+	 * 
+	 * @return isCastlingValid returns whether or not this piece has been 
+	 * moved
+	 ************************************************************************/
+	public boolean isCastlingValid() {
+		return isCastlingValid;
+	}
+	
+	/*************************************************************************
+	 * Setter method that sets the castling to false once the piece has moved.
+	 * 
+	 * @param isCastlingValid sets this value to true or false depending on
+	 * whether or not the king has moved
+	 ************************************************************************/
+	public void setCastlingValid(boolean isCastlingValid) {
+		this.isCastlingValid = isCastlingValid;
+	}
+
+	/*************************************************************************
+	 * Getter method that returns the type of piece that it is. This returns 
+	 * a king.
+	 * 
+	 * @see chess.ChessPiece#type()
+	 * @return King the type of piece it is
+	 ************************************************************************/
+	@Override
+	public String type() {
+		return "King";
+	}
+	
+	/*************************************************************************
+	 * Getter method that the AI uses to get the value of each piece to make 
+	 * in game decisions.
+	 * 
+	 * @see chess.ChessPiece#getPieceWorth()
+	 * @return PIECE_WORTH the value assigned to the current piece
+	 ************************************************************************/
+	@Override
+	public int getPieceWorth() {
+		return PIECE_WORTH;
+	}
+	
+	/*************************************************************************
+	 * Method that checks to see if the piece is a valid move. This uses
+	 * the properties of a king chess piece to make sure it can make a valid 
+	 * move.
+	 * 
+	 * @see chess.ChessPiece#isValidMove(chess.Move, chess.IChessPiece[][]) 
+	 * @param move the current move that is being attempted
+	 * @param board the king has access to the board if needed but it is not 
+	 * required to use it
+	 ************************************************************************/
+	@Override
+	public boolean isValidMove(Move move, IChessPiece[][] board) {
+		if (super.isValidMove(move, board))
+			for (int row = - 1; row <= 1; row++)
+				for (int col = -1; col <= 1; col++) {
+					if ((move.fromColumn + col) == move.toColumn && (move.fromRow + row) == move.toRow) {
+						isCastlingValid = false;
+						return true;
+					}	
+				}
+		return false;
+	}
+}
