@@ -1,0 +1,127 @@
+package chess;
+
+/*****************************************************************************
+ * This class holds the properties for the Rook chess piece and it also 
+ * includes other information necessary to use the Rook.
+ * 
+ * @author Matthew Shampine and Nathan Kelderman
+ ****************************************************************************/
+public class Rook extends ChessPiece {
+
+	/** This is a boolean to make sure the rook hasn't moved and that 
+	 * castling is valid */
+	private boolean isCastlingValid;
+
+	/** This is the value of the Rook used for the AI to make decisions about
+	 * the game */
+	private final int PIECE_WORTH = 5;
+
+	/*************************************************************************
+	 * Default constructor for the Rook class which sets up two rooks for each
+	 * player. This also sets castling true because at the start of the game 
+	 * the rook has not moved.
+	 * 
+	 * @param player this is the current player that the piece is assigned to
+	 ************************************************************************/
+	protected Rook(Player player) {
+		super(player);
+		isCastlingValid = true;
+	}
+
+	/*************************************************************************
+	 * Getter method that returns the type of piece that it is. This returns 
+	 * a rook.
+	 * 
+	 * @see chess.ChessPiece#type()
+	 * @return Rook the type of piece it is
+	 ************************************************************************/
+	@Override
+	public String type() {
+		return "Rook";
+	}
+
+	/*************************************************************************
+	 * Getter method that the AI uses to get the value of each piece to make 
+	 * in game decisions.
+	 * 
+	 * @see chess.ChessPiece#getPieceWorth()
+	 * @return PIECE_WORTH the value assigned to the current piece
+	 ************************************************************************/
+	@Override
+	public int getPieceWorth() {
+		return PIECE_WORTH;
+	}
+	
+	/*************************************************************************
+	 * Getter method returns whether or not castling is a valid move for the 
+	 * rook.
+	 * 
+	 * @return isCastlingValid returns whether or not this piece has been 
+	 * moved
+	 ************************************************************************/
+	public boolean isCastlingValid() {
+		return isCastlingValid;
+	}
+	
+	/*************************************************************************
+	 * Setter method that sets the castling to false once the piece has moved.
+	 * 
+	 * @param isCastlingValid sets this value to true or false depending on
+	 * whether or not the rook has moved
+	 ************************************************************************/
+	public void setCastlingValid(boolean isCastlingValid) {
+		this.isCastlingValid = isCastlingValid;
+	}
+	
+	/*************************************************************************
+	 * Method that checks to see if the piece is a valid move. This uses
+	 * the properties of a rook chess piece to make sure it can make a valid 
+	 * move.
+	 * 
+	 * @see chess.ChessPiece#isValidMove(chess.Move, chess.IChessPiece[][]) 
+	 * @param move the current move that is being attempted
+	 * @param board the rook has access to the board and uses it to make sure
+	 * that it does not go through pieces of the opposite player
+	 ************************************************************************/
+	@Override
+	public boolean isValidMove(Move move, IChessPiece[][] board) {
+		if (super.isValidMove(move, board))
+			if ((move.fromRow > move.toRow) && move.fromColumn == move.toColumn) {
+				for (int row = (move.fromRow - 1); row > move.toRow; row--) {
+					if (board[row][move.fromColumn] != null) {
+						return false;
+					}
+				}
+				isCastlingValid = false;
+				return true;
+			}
+			else if ((move.fromRow < move.toRow) && move.fromColumn == move.toColumn) {
+				for (int row = (move.fromRow + 1); row < move.toRow; row++) {
+					if (board[row][move.fromColumn] != null) {
+						return false;
+					}
+				}
+				isCastlingValid = false;
+				return true;
+			}
+			else if ((move.fromColumn < move.toColumn) && move.fromRow == move.toRow) {
+				for (int col = (move.fromColumn + 1); col < move.toColumn; col++) {
+					if (board[move.fromRow][col] != null) {
+						return false;
+					}
+				}
+				isCastlingValid = false;
+				return true;
+			}
+			else if ((move.fromColumn > move.toColumn) && move.fromRow == move.toRow) {
+				for (int col = (move.fromColumn - 1); col > move.toColumn; col--) {
+					if (board[move.fromRow][col] != null) {
+						return false;
+					}
+				}
+				isCastlingValid = false;
+				return true;
+			}
+		return false;
+	}
+}
