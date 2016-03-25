@@ -1,0 +1,135 @@
+package chess;
+
+/*****************************************************************************
+ * This class holds the properties for the Queen chess piece and it also 
+ * includes other information necessary to use the Queen.
+ * 
+ * @author Matthew Shampine and Nathan Kelderman
+ ****************************************************************************/
+public class Queen extends ChessPiece {
+	
+	/** This is the value of the Queen used for the AI to make decisions about
+	 * the game */
+	private final int PIECE_WORTH = 9;
+
+	/*************************************************************************
+	 * Default constructor for the Queen class which sets up a queen for each
+	 * player.
+	 * 
+	 * @param player this is the current player that the piece is assigned to
+	 ************************************************************************/
+	protected Queen(Player player) {
+		super(player);
+	}
+
+	/*************************************************************************
+	 * Getter method that returns the type of piece that it is. This returns 
+	 * a queen.
+	 * 
+	 * @see chess.ChessPiece#type()
+	 * @return Queen the type of piece it is
+	 ************************************************************************/
+	@Override
+	public String type() {
+		// TODO Auto-generated method stub
+		return "Queen";
+	}
+	
+	/*************************************************************************
+	 * Getter method that the AI uses to get the value of each piece to make 
+	 * in game decisions.
+	 * 
+	 * @see chess.ChessPiece#getPieceWorth()
+	 * @return PIECE_WORTH the value assigned to the current piece
+	 ************************************************************************/
+	@Override
+	public int getPieceWorth() {
+		return PIECE_WORTH;
+	}
+
+	/*************************************************************************
+	 * Method that checks to see if the piece is a valid move. This uses
+	 * the properties of a queen chess piece to make sure it can make a valid 
+	 * move.
+	 * 
+	 * @see chess.ChessPiece#isValidMove(chess.Move, chess.IChessPiece[][]) 
+	 * @param move the current move that is being attempted
+	 * @param board the queen has access to the board to make sure that 
+	 * the queen does not pass through pieces on the board
+	 ************************************************************************/
+	@Override
+	public boolean isValidMove(Move move, IChessPiece[][] board) {
+		if (super.isValidMove(move, board)) {
+			if ((move.fromRow > move.toRow) && move.fromColumn == move.toColumn) { //move.fromRow < move.toRow ||
+				for (int row = (move.fromRow - 1); row > move.toRow; row--) {
+					if (board[row][move.fromColumn] != null) {
+						return false;
+					}
+				}
+				return true;
+			}
+			else if ((move.fromRow < move.toRow) && move.fromColumn == move.toColumn) {
+				for (int row = (move.fromRow + 1); row < move.toRow; row++) {
+					if (board[row][move.fromColumn] != null) {
+						return false;
+					}
+				}
+				return true;
+			}
+			else if ((move.fromColumn < move.toColumn) && move.fromRow == move.toRow) {
+				for (int col = (move.fromColumn + 1); col < move.toColumn; col++) {
+					if (board[move.fromRow][col] != null) {
+						return false;
+					}
+				}
+				return true;
+			}
+			else if ((move.fromColumn > move.toColumn) && move.fromRow == move.toRow) {
+				for (int col = (move.fromColumn - 1); col > move.toColumn; col--) {
+					if (board[move.fromRow][col] != null) {
+						return false;
+					}
+				}
+				return true;
+			}
+			if (move.fromColumn < move.toColumn && move.fromRow < move.toRow
+					&& (move.toRow - move.fromRow) == (move.toColumn - move.fromColumn)) {
+				for (int row = (move.fromRow + 1); row < move.toRow; row++)
+					for (int col = (move.fromColumn + 1); col < move.toColumn; col++)
+						if (board[row][col] != null && (row - move.fromRow) == (col - move.fromColumn)) {
+							return false;
+						}
+				return true;
+			}
+			else if (move.fromColumn > move.toColumn && move.fromRow > move.toRow
+					&& (move.fromRow - move.toRow) == (move.fromColumn -  move.toColumn)) {
+				for (int row = (move.fromRow - 1); row > move.toRow; row--)
+					for (int col = (move.fromColumn - 1); col > move.toColumn; col--)
+						if (board[row][col] != null && (move.fromRow - row) == (move.fromColumn - col)) {
+							return false;
+						}
+				return true;
+			}
+			else if (move.fromColumn < move.toColumn && move.fromRow > move.toRow
+					&& (move.fromRow - move.toRow) == (move.toColumn - move.fromColumn)) {
+				for (int row = (move.fromRow - 1); row > move.toRow; row--)
+					for (int col = (move.fromColumn + 1); col < move.toColumn; col++)
+						if (board[row][col] != null && (move.fromRow - row) == (col - move.fromColumn)) {
+							return false;
+						}
+				return true;
+			}
+			else if (move.fromColumn > move.toColumn && move.fromRow < move.toRow
+					&& (move.toRow - move.fromRow) == (move.fromColumn - move.toColumn)) {
+				for (int row = (move.fromRow + 1); row < move.toRow; row++)
+					for (int col = (move.fromColumn - 1); col > move.toColumn; col--)
+						if (board[row][col] != null && (row - move.fromRow) == (move.fromColumn - col)) {
+							return false;
+						}
+				return true;
+			}
+		}
+		return false;
+	}
+
+}
