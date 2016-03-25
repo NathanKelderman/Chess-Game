@@ -1,0 +1,69 @@
+package chess;
+
+/*****************************************************************************
+ * This class holds the properties for the Knight chess piece and it also 
+ * includes other information necessary to use the Knight.
+ * 
+ * @author Matthew Shampine and Nathan Kelderman
+ ****************************************************************************/
+public class Knight extends ChessPiece {
+	
+	/** This is the value of the Knight used for the AI to make decisions 
+	 * about the game */
+	private final int PIECE_WORTH = 4;
+
+	/*************************************************************************
+	 * Default constructor for the Knight class which sets up a Knight for 
+	 * each player.
+	 * 
+	 * @param player this is the current player that the piece is assigned to
+	 ************************************************************************/
+	protected Knight(Player player) {
+		super(player);
+	}
+
+	/*************************************************************************
+	 * Getter method that returns the type of piece that it is. This returns 
+	 * a knight.
+	 * 
+	 * @see chess.ChessPiece#type() this type of piece is the knight
+	 * @return Knight the type of piece that it is
+	 ************************************************************************/
+	@Override
+	public String type() {
+		return "Knight";
+	}
+	
+	/*************************************************************************
+	 * Getter method that the AI uses to get the value of each piece to make 
+	 * in game decisions.
+	 * 
+	 * @see chess.ChessPiece#getPieceWorth()
+	 * @return PIECE_WORTH the value assigned to the current piece
+	 ************************************************************************/
+	@Override
+	public int getPieceWorth() {
+		return PIECE_WORTH;
+	}
+
+	/*************************************************************************
+	 * Method that checks to see if the piece is a valid move. This uses
+	 * the properties of a knight chess piece to make sure it can make a valid 
+	 * move.
+	 * 
+	 * @see chess.ChessPiece#isValidMove(chess.Move, chess.IChessPiece[][])
+	 * @param move the current move that is being attempted
+	 * @param board the knight has access to the board if needed but it is not 
+	 * required to use it
+	 ************************************************************************/
+	@Override
+	public boolean isValidMove(Move move, IChessPiece[][] board) {
+		if (super.isValidMove(move, board))
+
+			if ((Math.abs(move.toColumn - move.fromColumn) == 2 && Math.abs(move.toRow - move.fromRow) == 1) || 
+					(Math.abs(move.toColumn - move.fromColumn) == 1 && Math.abs(move.toRow - move.fromRow) == 2))
+				return true;
+
+		return false;
+	}
+}
