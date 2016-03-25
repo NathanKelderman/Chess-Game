@@ -1,0 +1,110 @@
+package chess; 
+
+/*****************************************************************************
+ * This class holds the properties for the Pawn chess piece and it also 
+ * includes other information necessary to use the Pawn.
+ * 
+ * @author Matthew Shampine and Nathan Kelderman
+ ****************************************************************************/
+public class Pawn extends ChessPiece {
+
+	/** This is the value of the King used for the AI to make decisions about
+	 * the game */
+	private final int PIECE_WORTH = 1;
+
+	/*************************************************************************
+	 * Default constructor for the Pawn class which has multiple pawns for
+	 * each player.
+	 * 
+	 * @param player this is the current player that the piece is assigned to
+	 ************************************************************************/
+	protected Pawn(Player player) {
+		super(player);
+	}
+
+	/*************************************************************************
+	 * Getter method that returns the type of piece that it is. This returns 
+	 * a pawn.
+	 * 
+	 * @see chess.ChessPiece#type()
+	 * @return Pawn the type of piece it is
+	 ************************************************************************/
+	@Override
+	public String type() {
+		return "Pawn";
+	}
+
+	/*************************************************************************
+	 * Getter method that the AI uses to get the value of each piece to make 
+	 * in game decisions.
+	 * 
+	 * @see chess.ChessPiece#getPieceWorth()
+	 * @return PIECE_WORTH the value assigned to the current piece
+	 ************************************************************************/
+	@Override
+	public int getPieceWorth() {
+		return PIECE_WORTH;
+	}
+
+	/*************************************************************************
+	 * Method that checks to see if the piece is a valid move. This uses
+	 * the properties of a pawn chess piece to make sure it can make a valid 
+	 * move.
+	 * 
+	 * @see chess.ChessPiece#isValidMove(chess.Move, chess.IChessPiece[][]) 
+	 * @param move the current move that is being attempted
+	 * @param board the pawn has access to the board and it is used everywhere
+	 * for the pawn class
+	 ************************************************************************/
+	@Override
+	public boolean isValidMove(Move move, IChessPiece[][] board) {
+		if (super.isValidMove(move, board))
+			if (player() == Player.WHITE && move.fromRow != 0) {
+				if (board[move.toRow][move.toColumn] != null) { // if there's a piece in the destination
+					boolean tempValid = false;
+					if (move.fromColumn != 7) {
+						if (board[move.toRow][move.toColumn] == board[move.fromRow-1][move.fromColumn+1]) {
+							tempValid = true;
+						}
+					}
+					if (move.fromColumn != 0)
+						if (board[move.toRow][move.toColumn] == board[move.fromRow-1][move.fromColumn-1]) {
+							tempValid = true;
+						}
+					return tempValid;
+				}
+				else 
+					if (move.toRow == (move.fromRow - 2) && move.toColumn == move.fromColumn && move.fromRow == 6) {
+						if (board[move.fromRow -1][move.fromColumn] == null)
+							return true;
+					}
+					else if (move.toRow == (move.fromRow - 1) && move.toColumn == move.fromColumn) {
+						return true;
+					}
+			}
+			else if (player() == Player.BLACK && move.fromRow != 7) {
+				if (board[move.toRow][move.toColumn] != null) { // if there's a piece in the destination
+					boolean tempValid = false;
+					if (move.fromColumn != 7) {
+						if (board[move.toRow][move.toColumn] == board[move.fromRow+1][move.fromColumn+1]) {
+							tempValid = true;
+						}
+					}
+					if (move.fromColumn != 0)
+						if (board[move.toRow][move.toColumn] == board[move.fromRow+1][move.fromColumn-1]) {
+							tempValid = true;
+						}
+					return tempValid;
+				}
+				else 
+					if (move.toRow == (move.fromRow + 2) && move.toColumn == move.fromColumn && move.fromRow == 1) {
+						if (board[move.fromRow + 1][move.fromColumn] == null)
+							return true;
+					}
+					else if (move.toRow == (move.fromRow + 1) && move.toColumn == move.fromColumn) {
+						return true;
+					}
+			}
+		return false;
+	}
+}
