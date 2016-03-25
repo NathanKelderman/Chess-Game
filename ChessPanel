@@ -98,7 +98,7 @@ public class ChessPanel extends JPanel {
 		for (int row = 0; row < model.numRows(); row++) {
 			for (int col = 0; col < model.numColumns(); col++) {
 				if (model.pieceAt(row, col) != null) {
-					if (model.pieceAt(row, col).player() == Player.WHITE ) {
+					if (model.pieceAt(row, col).player() == Player.WHITE) {
 						if (model.pieceAt(row, col).type().equals("Pawn"))
 							board[row][col].setIcon(pawn);
 						if (model.pieceAt(row, col).type().equals("Rook"))
