@@ -1,0 +1,30 @@
+private ImageIcon check = new ImageIcon("/home/matthew/"
+			+ "workspace/ChessPrj/src/chess/check.png");
+	private ImageIcon checkMate = new ImageIcon("/home/matthew/"
+			+ "workspace/ChessPrj/src/chess/checkMate.png");
+	private ImageIcon warningIcon = new ImageIcon("/home/matthew/"
+			+ "workspace/ChessPrj/src/chess/warningIcon.png");
+	private ImageIcon rook = new ImageIcon("/home/matthew/workspace/"
+			+ "ChessPrj/src/chess/White/rook.png");
+	private ImageIcon pawn = new ImageIcon("/home/matthew/workspace/"
+			+ "ChessPrj/src/chess/White/pawn.png");
+	private ImageIcon bishop = new ImageIcon("/home/matthew/workspace/"
+			+ "ChessPrj/src/chess/White/bishop.png");
+	private ImageIcon knight = new ImageIcon("/home/matthew/workspace/"
+			+ "ChessPrj/src/chess/White/knight.png");
+	private ImageIcon queen = new ImageIcon("/home/matthew/workspace/"
+			+ "ChessPrj/src/chess/White/queen.png");
+	private ImageIcon king = new ImageIcon("/home/matthew/workspace/"
+			+ "ChessPrj/src/chess/White/king.png");
+	private ImageIcon rookB = new ImageIcon("/home/matthew/workspace/"
+			+ "ChessPrj/src/chess/Black/rookB.png");
+	private ImageIcon pawnB = new ImageIcon("/home/matthew/workspace/"
+			+ "ChessPrj/src/chess/Black/pawnB.png");
+	private ImageIcon bishopB = new ImageIcon("/home/matthew/workspace/"
+			+ "ChessPrj/src/chess/Black/bishopB.png");
+	private ImageIcon knightB = new ImageIcon("/home/matthew/workspace/"
+			+ "ChessPrj/src/chess/Black/knightB.png");
+	private ImageIcon queenB = new ImageIcon("/home/matthew/workspace/"
+			+ "ChessPrj/src/chess/Black/queenB.png");
+	private ImageIcon kingB = new ImageIcon("/home/matthew/workspace/"
+			+ "ChessPrj/src/chess/Black/kingB.png");
