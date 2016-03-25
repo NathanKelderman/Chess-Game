@@ -1,20 +1,23 @@
+package chess;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
-import javax.swing.ImageIcon;
+import javax.swing.ButtonGroup;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JRadioButtonMenuItem;
 
 public class ChessGUI {
-	
+
 	private static JMenuBar menuBar;
 	private static JMenu menu;
 	private static JMenu menuNewGame;
 	private static JMenuItem menuPlayer;
 	private static JMenuItem menuAI;
+	private static JRadioButtonMenuItem highlightOn;
+	private static JRadioButtonMenuItem highlightOff;
 	private static JMenuItem menuExit;
 
 	public static void main(String[] args) {
@@ -23,8 +26,8 @@ public class ChessGUI {
 
 		ChessPanel panel = new ChessPanel();
 		frame.getContentPane().add(panel);
-		
-		frame.setSize(740, 790);
+		/* Need to change this value for Linux machines. (740, 780) */
+		frame.setSize(740, 766);
 		frame.setLocationRelativeTo(null);
 
 		class MenuActionListener implements ActionListener {
@@ -41,33 +44,66 @@ public class ChessGUI {
 					panel.setAI(true);
 				}
 				
+				if (e.getSource() == highlightOn) {
+					panel.turnHighlightOn(true);
+				}
+				
+				if (e.getSource() == highlightOff) {
+					panel.turnHighlightOn(false);
+					panel.highlight(false);
+				}
+				
 				if (e.getSource() == menuExit)
 					System.exit(0);
 			}
 		}
 
+		// adding a menu to a JMenuBar on the frame
 		menuBar = new JMenuBar();
 		menu = new JMenu("Options");
 		menuBar.add(menu);
+		
+		// adding the new game to the menu
 		menuNewGame = new JMenu("New Game");
 		menuNewGame.addActionListener(new MenuActionListener());
 		menu.add(menuNewGame);
 		
+		// player mode under New Game
 		menuPlayer = new JMenuItem("Player mode");
 		menuPlayer.addActionListener(new MenuActionListener());
 		menuNewGame.add(menuPlayer);
 		
-		
+		// AI mode under New Game
 		menuAI = new JMenuItem("AI mode");
 		menuAI.addActionListener(new MenuActionListener());
 		menuNewGame.add(menuAI);
 		
+		menu.addSeparator();
 		
+		// highlight on radio button
+		ButtonGroup group = new ButtonGroup();
+		highlightOn = new JRadioButtonMenuItem("Highlight On");
+		highlightOn.addActionListener(new MenuActionListener());
+		highlightOn.setSelected(true); // defaulted to highlight on
+		group.add(highlightOn);
+		menu.add(highlightOn);
+		
+		// highlight off radio button
+		highlightOff = new JRadioButtonMenuItem("Highlight Off");
+		highlightOff.addActionListener(new MenuActionListener());
+		group.add(highlightOff);
+		menu.add(highlightOff);
+		
+		menu.addSeparator();
+
+		// adding the Exit button to the menu
 		menuExit= new JMenuItem("Exit");
 		menuExit.addActionListener(new MenuActionListener());
 		menu.add(menuExit);
 		frame.setJMenuBar(menuBar);
 		
+		/* set visible is last because it creates the JMenuBar first then 
+		 * displays the panel */
 		frame.setVisible(true);
 	}
 }
